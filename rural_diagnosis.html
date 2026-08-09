@@ -42,22 +42,22 @@
 <script>
 const { useState, useEffect, useRef } = React;
 const QUESTIONS = [
-  { id: 1, axis: "TL", direction: "T", bias: 0, text: "データが示す客観的な事実と自分の感覚が食い違ったときには、自分の直感に従うようにしている" },
-  { id: 2, axis: "HS", direction: "H", bias: 0, text: "たとえ時間がかかっても、人の気持ちに働きかけることが、地域の問題の根本的な解決につながると思う" },
-  { id: 3, axis: "CI", direction: "C", bias: 0.1, text: "自分が属するコミュニティのために、個人的な利益や希望を抑えることは大切だと思う" },
+  { id: 1, axis: "TL", direction: "T", bias: 0, text: "資料の上では問題がなくても、何か引っかかるものがあれば、そちらを大事にすることが多い" },
+  { id: 2, axis: "HS", direction: "H", bias: 0, text: "たとえ時間がかかっても、人の気持ちに働きかけることが問題の解決につながると思う" },
+  { id: 3, axis: "CI", direction: "C", bias: 0.1, text: "話し合いで決まったことには、自分が反対していたとしても従うようにしている" },
   { id: 4, axis: "OR", direction: "O", bias: 0.1, text: "努力や才能で手に入れた成果なら、収入や生活水準に大きな差がついても当然だと思う" },
-  { id: 5, axis: "CI", direction: "C", bias: 0, text: "自分の所属するコミュニティのイベントや飲み会には、積極的に参加することが大切だと思う" },
-  { id: 6, axis: "OR", direction: "O", bias: 0, text: "たとえ負ける人が出るとしても、競争は社会を良くするために必要だと思う" },
+  { id: 5, axis: "CI", direction: "C", bias: 0, text: "自分が入っているチームや組織の行事には、気が進まないときでも顔を出すことが大切だと思う" },
+  { id: 6, axis: "OR", direction: "O", bias: 0, text: "手を貸すかどうかは、その人が自分で何とかしようとしているかを見て決めることが多い" },
   { id: 7, axis: "TL", direction: "T", bias: 0.1, text: "はっきり言葉にされていなくても、その場の空気や相手の様子から判断して動くことが多い" },
-  { id: 8, axis: "HS", direction: "H", bias: 0, text: "人々の意識や価値観が変わっていけば、仕組みや制度は後からついてくると思う" },
-  { id: 9, axis: "TL", direction: "L", bias: 0, text: "物事の方向を決めるときは、データや数字による根拠を大切にすべきだと思う" },
-  { id: 10, axis: "OR", direction: "R", bias: 0, text: "社会の格差を縮めるためなら、自分の経済的な負担が増えることも受け入れるべきだと思う" },
-  { id: 11, axis: "HS", direction: "S", bias: 0.1, text: "仕組みやルールを変えることで、世の中をよりよくしていきたいと思う" },
+  { id: 8, axis: "HS", direction: "H", bias: 0, text: "もめごとが起きたときは、規則で判断する前に、まず本人たちの話を聞くようにしている" },
+  { id: 9, axis: "TL", direction: "L", bias: 0, text: "経験の長い人の意見であっても、まずその理由を確かめるようにしている" },
+  { id: 10, axis: "OR", direction: "R", bias: 0, text: "みんなが同じくらい受け取れるなら、自分の取り分が減ってもかまわないと思う" },
+  { id: 11, axis: "HS", direction: "S", bias: 0.1, text: "窮屈に思われても、期限や罰則をはっきり決めておくことで物事はうまく進むと思う" },
   { id: 12, axis: "OR", direction: "R", bias: 0, text: "生まれた環境による人生の出発点の差は、社会が埋めるべきだと思う" },
-  { id: 13, axis: "CI", direction: "I", bias: 0, text: "家族や地域がどう思おうと、自分の生き方は自分の意思で決めるべきだと思う" },
-  { id: 14, axis: "HS", direction: "S", bias: 0, text: "社会や地域の問題は、人々の気持ちが変わらなくても、制度や仕組みを整えることで解決できると思う" },
-  { id: 15, axis: "CI", direction: "I", bias: 0, text: "１つの地域に長く関わり続けることは、自分の性格には向いていないと思う" },
-  { id: 16, axis: "TL", direction: "L", bias: 0, text: "取り組むことに対して、手順や計画を事前に整理してから始めるのが得意な方だと思う" }
+  { id: 13, axis: "CI", direction: "I", bias: 0, text: "家族やまわりの人がどう思おうと、自分の生き方は自分で決めるべきだと思う" },
+  { id: 14, axis: "HS", direction: "S", bias: 0, text: "世の中の問題は、人々の気持ちが変わらなくても、決まりや仕組みを整えれば解決できると思う" },
+  { id: 15, axis: "CI", direction: "I", bias: 0, text: "まわりがまだ残っていても、自分の用事があるときは先に切り上げるようにしている" },
+  { id: 16, axis: "TL", direction: "L", bias: 0, text: "何かを始めるときは、手順や計画を先に整理してから取りかかることが多い" }
 ];
 const DIFFERENT_TYPE = {
   TCHO: "TISR",
@@ -347,43 +347,91 @@ const COURSES = {
   ]
 };
 const NEXT_STEPS = {
-  TCHO: { action: "家にある器を、ひとつ裏返してみる", note: "産地の名が入っているかもしれません。その土地では、いまも同じ手つきで作っている人がいます。", lead: "石徹白洋品店の平野馨生里さんほか、あなたのタイプの先輩の講座が2件" },
-  TCHR: { action: "いま旬のものを、ひとつ取り寄せる", note: "誰がどこで作ったかが書いてあります。その名前を覚えておくと、次にどこへ行きたいかが決まります。", lead: "山地酪農の吉塚公雄さんほか、あなたのタイプの先輩の講座が2件" },
-  LCHO: { action: "次の休みに誰かを連れて行くなら、どこか考えてみる", note: "自然学校でも農場でも、思ったより近くにあるものです。ひとりで行くより、連れがいたほうが遠くまで行けます。", lead: "森のようちえんの葭田昭子さんほか、あなたのタイプの先輩の講座が2件" },
-  LCHR: { action: "いつもの道で、人の手が入った風景をひとつ探す", note: "石垣、水路、手入れされた林。誰かが百年前に決めたことが、いまも形として残っています。", lead: "哲学者・内山節さんほか、あなたのタイプの先輩の講座が2件" },
-  TCSO: { action: "気になる町の道の駅を、ひとつ調べる", note: "何を売っているかで、その町が何に賭けているかが見えます。行ける距離なら、次の休みの行き先です。", lead: "西川町長・菅野大志さんほか、あなたのタイプの先輩の講座が2件" },
-  TCSR: { action: "好きな産地の魅力を、100文字で書いてみる", note: "書けたなら、あなたはもう伝える側です。書けなかったなら、まだ会っていない人がいます。", lead: "雨風太陽の高橋博之さんほか、あなたのタイプの先輩の講座が2件" },
-  LCSO: { action: "気になる町の広報を、ひとつ開く", note: "何にお金を使っているかに、その町の判断が出ます。面白ければ、現地を見に行く理由になります。", lead: "地球のしごと大學理事長・高浜大介ほか、あなたのタイプの先輩の講座が2件" },
-  LCSR: { action: "移住相談の窓口に、質問をひとつ送る", note: "まだ決めていない段階で聞いていい場所です。返事の速さと丁寧さに、その町の姿勢が出ます。", lead: "西会津国際芸術村の矢部佳宏さんほか、あなたのタイプの先輩の講座が2件" },
-  TIHO: { action: "行ってみたい山を、地図でひとつ見つける", note: "その山で何が採れるか、誰が入っているか。入口さえ分かれば、あとは足が向きます。", lead: "猟師工房の原田祐介さんほか、あなたのタイプの先輩の講座が2件" },
-  TIHR: { action: "農繁期の手伝い募集を、ひとつ眺める", note: "いつ・どこで・何人が必要とされているか。行ける日が、意外と近くにあります。", lead: "浦河べてるの家ほか、あなたのタイプの先輩の講座が2件" },
-  LIHO: { action: "空き家バンクで、気になる一軒を見つける", note: "値段と間取りと立地。「自分ならここで何をするか」を考えた時点で、それはもう構想です。まずは近くまで見に行く。", lead: "草刈ロボットのハタケホットケほか、あなたのタイプの先輩の講座が2件" },
-  LIHR: { action: "泊まってみたい宿を、ひとつ見つける", note: "水のいい土地、静かな朝。ひと晩そこにいるだけで、暮らしとして成り立つかどうかは感じ取れます。", lead: "医師・山本竜隆さんほか、あなたのタイプの先輩の講座が2件" },
-  TISO: { action: "直売所か朝市に、ひとつ行ってみる", note: "誰が何をいくらで売っているか。自分なら何を並べるかを考えると、始める場所が具体的になります。", lead: "日本一の道の駅の森本健次さんほか、あなたのタイプの先輩の講座が2件" },
-  TISR: { action: "続いている店か蔵を、ひとつ訪ねる", note: "何年続いているのか、次は誰が継ぐのか。聞けば、たいてい話してくれます。", lead: "会津若松の本田勝之助さんほか、あなたのタイプの先輩の講座が2件" },
-  LISO: { action: "よく買う地域の産品が、どう届くか辿る", note: "誰が作り、誰が運び、誰が売っているか。どこかで必ず、詰まっている場所が見つかります。", lead: "官民連携の小坪拓也さんほか、あなたのタイプの先輩の講座が2件" },
-  LISR: { action: "気になる町をふたつ、★をつけて追いかける", note: "人口も産業も違う2つの町から便りが届きます。並べて眺めていると、数字では見えなかった差が出てきます。", lead: "琴平バスの楠木泰二朗さんほか、あなたのタイプの先輩の講座が2件" }
+  TCHO: {
+    action: "産地に伝わる技をひとつ選んで、その工房が見学できるか調べてみる",
+    lead: "石徹白洋品店の平野馨生里さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TCHR: {
+    action: "気になる土地の直売所か朝市をひとつ調べて、旬のものを取り寄せてみる",
+    lead: "山地酪農の吉塚公雄さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  LCHO: {
+    action: "近くの自然学校か体験プログラムをひとつ探して、身近な誰かを誘ってみる",
+    lead: "森のようちえんの葭田昭子さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  LCHR: {
+    action: "棚田や里山の風景をひとつ選んで、その土地の成り立ちを調べてみる",
+    lead: "哲学者・内山節さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TCSO: {
+    action: "気になる自治体のページから「まちの経営の工夫」をひとつ見つけてみる",
+    lead: "西川町長・菅野大志さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TCSR: {
+    action: "応援したい産地をひとつ決めて、その魅力を自分の言葉で書いてみる",
+    lead: "雨風太陽の高橋博之さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  LCSO: {
+    action: "うまく回っている地域の仕組みをひとつ調べて、その条件を書き出してみる",
+    lead: "地球のしごと大學理事長・高浜大介ほか、あなたのタイプの先輩の講座が2件"
+  },
+  LCSR: {
+    action: "移住相談やコミュニティのイベントをひとつ探して、話を聞いてみる",
+    lead: "西会津国際芸術村の矢部佳宏さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TIHO: {
+    action: "行ってみたい山か森をひとつ決めて、そこで採れるものを調べてみる",
+    lead: "猟師工房の原田祐介さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TIHR: {
+    action: "農繁期の手伝い募集をひとつ眺めて、行ける時期があるか確かめてみる",
+    lead: "浦河べてるの家ほか、あなたのタイプの先輩の講座が2件"
+  },
+  LIHO: {
+    action: "空き家バンクをひとつ開いて、自分なら何に使うかを考えてみる",
+    lead: "草刈ロボットのハタケホットケほか、あなたのタイプの先輩の講座が2件"
+  },
+  LIHR: {
+    action: "名水や自然農の土地をひとつ調べて、行ける日をカレンダーに入れてみる",
+    lead: "医師・山本竜隆さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TISO: {
+    action: "新規就農や起業の支援制度をひとつ調べて、条件を確かめてみる",
+    lead: "日本一の道の駅の森本健次さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  TISR: {
+    action: "続いている家業をひとつ選んで、何代続いているか調べてみる",
+    lead: "会津若松の本田勝之助さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  LISO: {
+    action: "気になる地域の産品がどう流通しているか、ひとつ辿ってみる",
+    lead: "官民連携の小坪拓也さんほか、あなたのタイプの先輩の講座が2件"
+  },
+  LISR: {
+    action: "条件の似た2つの町を選んで、人口と主要産業を並べて比べてみる",
+    lead: "琴平バスの楠木泰二朗さんほか、あなたのタイプの先輩の講座が2件"
+  }
 };
 const TAMA_PROMO = {
   cta: "事前登録して待つ",
   url: "#",
   byType: {
-    TCHO: { title: "産地をたずねて、技を集める", body: "陶磁器46・織物44・漆器の産地。訪れた土地の品が棚に増え、その道の人から直接教われば師の名も残ります" },
-    TCHR: { title: "季節ごとに、その土地のものを受け取る", body: "農産物1,725件・水産物694件。行った町の旬が棚に並び、手に入れたものは誰かに贈ることもできます" },
-    LCHO: { title: "連れて行った先が、ふたりの記録になる", body: "博物館101件・遺跡207件・体験の場。同行者と別のものを選んで分け合えば、ふたり分が早く揃います" },
-    LCHR: { title: "風景の成り立ちを、たどって歩く", body: "棚田279件・社寺218件・名水222件。訪ねた場所の由来を書き残すと、それが次に来る人の道しるべになります" },
-    TCSO: { title: "よその町の売り場を、見て回る", body: "道の駅1,231件・市場39件。実際に見た記録が地図に増え、自分の町と比べられるようになります" },
-    TCSR: { title: "産地をたずねて、まだ語られていない魅力を書く", body: "全国1,741市区町村。あなたが書いた便りが、その町を知らなかった誰かに届きます" },
-    LCSO: { title: "うまく回っている仕組みを、現地で確かめる", body: "道の駅1,231件・小水力や地域交通の実装地。泊まって話を聞けば、資料には出てこない条件が分かります" },
-    LCSR: { title: "人が集まる場所に、顔を出す", body: "ゲストハウス・公民館・コワーキング。通った回数が縁として積み上がり、その町の常連として迎えられます" },
-    TIHO: { title: "人の少ない場所へ、分け入る", body: "山岳177件・樹木155件・洞窟54件。狩猟や炭焼きの技は、その土地の人から直接しか教われません" },
-    TIHR: { title: "手伝いに行った先が、地図に増える", body: "農繁期の収穫、浜の作業。受け入れ側の確認がつくので、行った記録がそのまま信頼になります" },
-    LIHO: { title: "使われていない場所を、見て回る", body: "町並み・集落249件・空き家。泊まって朝を迎えると、その土地で何ができるかが見えてきます" },
-    LIHR: { title: "水と土のいい場所に、泊まり歩く", body: "名水・湧水222件（47都道府県）・温泉68件。夜と朝を過ごした場所だけが、暮らせるかどうかを教えてくれます" },
-    TISO: { title: "自分が入れる隙間を、探して回る", body: "道の駅1,231件・直売所。売り場を見た記録が集まると、始める場所を決める材料になります" },
-    TISR: { title: "続いてきた蔵や宿を、訪ねて泊まる", body: "醸造・酒339件（20県）・温泉68件。続けている人から聞いた話が、師の記録として残ります" },
-    LISO: { title: "ものが動く場所を、見に行く", body: "卸売市場39件・漁港55件・道の駅1,231件。流れを見た記録が集まると、詰まりの場所が分かります" },
-    LISR: { title: "似た条件の町を、いくつも訪ねる", body: "全国1,741市区町村。訪ねた町が地図に並び、数字だけでは見えなかった差が比べられます" }
+    TCHO: { title: "技のある町を訪ねる", body: "陶磁器・織物・染めの産地を巡り、その土地でしか手に入らない品を集める。全国46の焼き物、44の織物が待っている" },
+    TCHR: { title: "一次産業の現場に立つ", body: "農産物1,725件・水産物694件。田畑と漁港を訪ね、その季節にそこでしか採れないものを受け取る" },
+    LCHO: { title: "学びの場を見つけて回る", body: "博物館101件・遺跡207件。子どもと歩ける学びの現場を探し、体験プログラムのある町を集める" },
+    LCHR: { title: "土地の思想にふれる", body: "棚田279件・社寺218件。人の手が自然と折り合ってきた風景を訪ね、その成り立ちを聞き書きする" },
+    TCSO: { title: "町の経営を見て回る", body: "道の駅1,231件。稼いでいる町の売り場を実際に見て、自分の町との違いを持ち帰る" },
+    TCSR: { title: "現場の声を集めて回る", body: "全国1,741市区町村。産地と作り手を訪ね、その町がまだ言葉にできていない魅力を書き留める" },
+    LCSO: { title: "仕組みが動く現場を見る", body: "道の駅1,231件・小水力や地域交通の実装地。うまく回っている仕組みを、現地で確かめる" },
+    LCSR: { title: "人がつながる場を巡る", body: "ゲストハウス・コワーキング・公民館。移住者と地元が混ざる場所を訪ね、その土地の人と縁を結ぶ" },
+    TIHO: { title: "山と獣の領域へ入る", body: "山岳177件・樹木155件・洞窟54件。人の少ない場所を選んで歩き、そこでしか採れないものを集める" },
+    TIHR: { title: "手伝いに行く", body: "農繁期の収穫、浜の作業。受け入れ側の確認がつく手伝いを重ね、その町の常連になっていく" },
+    LIHO: { title: "空き家と余白を探す", body: "町並み・集落249件。使われていない建物や土地を見て回り、次に何ができるかを考える" },
+    LIHR: { title: "養生と自然農の地を巡る", body: "名水・湧水222件（47都道府県）。水と土のいい場所を訪ね、自分の暮らしで確かめたことを書き残す" },
+    TISO: { title: "自分で始められる場所を探す", body: "道の駅1,231件・直売所。売り場と作り手を見て回り、自分が入れる隙間を見つける" },
+    TISR: { title: "受け継がれてきた家業を訪ねる", body: "醸造・酒339件（20県）・温泉68件。何代も続いてきた蔵や宿を訪ね、続けている人の話を聞く" },
+    LISO: { title: "流れと動きを見に行く", body: "卸売市場・物流拠点・港。ものと人がどう動いているかを現地で見て、詰まりを探す" },
+    LISR: { title: "複数の地域を比べて回る", body: "全国1,741市区町村。似た条件の町を複数訪ね、うまくいっている町との差を数字と現場で確かめる" }
   }
 };
 const LABELS = ["そう思う", "どちらかといえばそう思う", "どちらでもない", "どちらかといえばそう思わない", "そう思わない"];
@@ -836,11 +884,11 @@ function App() {
       const subHead = { fontSize: 13.5, fontWeight: 500, color: "#fff", lineHeight: 1.5, marginBottom: 6 };
       const subDesc = { fontSize: 11, color: "#fff", opacity: 0.8, lineHeight: 1.65, marginBottom: 8 };
       const subGo = { fontSize: 11.5, color: "#fff", fontWeight: 500 };
-      return /* @__PURE__ */ React.createElement("div", { style: { background: gi.color, borderRadius: "var(--border-radius-lg)", padding: "18px 18px", margin: "-12px 0 20px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 2, color: "#fff", opacity: 0.7, marginBottom: 6 } }, "次の一歩"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14.5, fontWeight: 500, color: "#fff", lineHeight: 1.75, marginBottom: 7 } }, step.action), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "#fff", opacity: 0.85, lineHeight: 1.8 } }, step.note), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 } }, /* @__PURE__ */ React.createElement("a", { href: EVENTS_URL, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "まなぶ"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "先輩の話を聞く"), (COURSES[r.code] || []).map((c, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { fontSize: 10.5, color: "#fff", opacity: 0.85, lineHeight: 1.55, marginBottom: i === 0 ? 5 : 8 } }, "「", c.title, "」", /* @__PURE__ */ React.createElement("span", { style: { opacity: 0.65 } }, "（", c.lecturer, "）"))), /* @__PURE__ */ React.createElement("div", { style: subGo }, "地球のしごと大學 →")), /* @__PURE__ */ React.createElement("a", { href: TAMA_PROMO.url, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "たびする"), /* @__PURE__ */ React.createElement("div", { style: subHead }, (TAMA_PROMO.byType[r.code] || {}).title), /* @__PURE__ */ React.createElement("div", { style: subDesc }, (TAMA_PROMO.byType[r.code] || {}).body), /* @__PURE__ */ React.createElement("div", { style: subGo }, TAMA_PROMO.cta, " →"))));
+      return /* @__PURE__ */ React.createElement("div", { style: { background: gi.color, borderRadius: "var(--border-radius-lg)", padding: "18px 18px", margin: "-12px 0 20px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 2, color: "#fff", opacity: 0.7, marginBottom: 6 } }, "次の一歩"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, color: "#fff", lineHeight: 1.85, marginBottom: 4 } }, step.action), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 } }, /* @__PURE__ */ React.createElement("a", { href: EVENTS_URL, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "まなぶ"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "先輩の話を聞く"), (COURSES[r.code] || []).map((c, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { fontSize: 10.5, color: "#fff", opacity: 0.85, lineHeight: 1.55, marginBottom: i === 0 ? 5 : 8 } }, "「", c.title, "」", /* @__PURE__ */ React.createElement("span", { style: { opacity: 0.65 } }, "（", c.lecturer, "）"))), /* @__PURE__ */ React.createElement("div", { style: subGo }, "地球のしごと大學 →")), /* @__PURE__ */ React.createElement("a", { href: TAMA_PROMO.url, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "たびする"), /* @__PURE__ */ React.createElement("div", { style: subHead }, (TAMA_PROMO.byType[r.code] || {}).title), /* @__PURE__ */ React.createElement("div", { style: subDesc }, (TAMA_PROMO.byType[r.code] || {}).body), /* @__PURE__ */ React.createElement("div", { style: subGo }, TAMA_PROMO.cta, " →"))));
     })(), (() => {
       const wf = WORK_FIELDS[r.code];
       if (!wf) return null;
-      return /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: `0.5px solid ${gi.color}44`, borderLeft: `3px solid ${gi.color}`, borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "向いている領域"), wf.fields.map((f, i) => /* @__PURE__ */ React.createElement("div", { key: f.cat, style: { marginBottom: i === wf.fields.length - 1 ? 0 : 14, paddingBottom: i === wf.fields.length - 1 ? 0 : 14, borderBottom: i === wf.fields.length - 1 ? "none" : "0.5px solid var(--color-border-tertiary)" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: i === 0 ? 17 : 14, fontWeight: 500, color: gi.color, lineHeight: 1.4, marginBottom: 4 } }, f.cat), /* @__PURE__ */ React.createElement("div", { style: { fontSize: i === 0 ? 13 : 12, color: "var(--color-text-secondary)", lineHeight: 1.8 } }, f.jobs))), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", lineHeight: 1.7, margin: "14px 0 0" } }, "しごとの名前は、その領域にあるものの一例です。ほかにもたくさんあります。"), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 16, paddingTop: 16, borderTop: `0.5px solid ${gi.color}33` } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", letterSpacing: 0.5, marginBottom: 6 } }, "どう関わるか"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 500, color: gi.color, marginBottom: 6, lineHeight: 1.5 } }, wf.head), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12.5, color: "var(--color-text-secondary)", lineHeight: 1.85, margin: 0 } }, wf.body)));
+      return /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: `0.5px solid ${gi.color}44`, borderLeft: `3px solid ${gi.color}`, borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "向いている領域"), wf.fields.map((f, i) => /* @__PURE__ */ React.createElement("div", { key: f.cat, style: { marginBottom: i === wf.fields.length - 1 ? 0 : 14, paddingBottom: i === wf.fields.length - 1 ? 0 : 14, borderBottom: i === wf.fields.length - 1 ? "none" : "0.5px solid var(--color-border-tertiary)" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 10, color: "var(--color-text-tertiary)", letterSpacing: 0.5, flexShrink: 0 } }, f.role), /* @__PURE__ */ React.createElement("span", { style: { fontSize: i === 0 ? 17 : 14, fontWeight: 500, color: gi.color, lineHeight: 1.4 } }, f.cat)), /* @__PURE__ */ React.createElement("div", { style: { fontSize: i === 0 ? 13 : 12, color: "var(--color-text-secondary)", lineHeight: 1.8 } }, f.jobs))), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", lineHeight: 1.7, margin: "14px 0 0" } }, "しごとの名前は、その領域にあるものの一例です。ほかにもたくさんあります。"), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 16, paddingTop: 16, borderTop: `0.5px solid ${gi.color}33` } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", letterSpacing: 0.5, marginBottom: 6 } }, "どう関わるか"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 500, color: gi.color, marginBottom: 6, lineHeight: 1.5 } }, wf.head), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12.5, color: "var(--color-text-secondary)", lineHeight: 1.85, margin: 0 } }, wf.body)));
     })(), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 20 } }, ti.body.split("\n\n").map((p, i) => /* @__PURE__ */ React.createElement("p", { key: i, style: { fontSize: 14, color: "var(--color-text-primary)", lineHeight: 1.95, margin: "0 0 14px" } }, p))), !isDetail && /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "4軸のスコア"), ["TL", "CI", "HS", "OR"].map((ax) => {
       const score = r.scores[ax];
       const p = axisPercent(ax, score);
