@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>農山漁村のしごと適性診断</title>
+<meta name="description" content="16問であなたの農山漁村での関わり方のタイプを診断します。">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&display=swap">
+<style>
+  /* JSX が参照するトークン。明色専用（理由は build_diagnosis_html.py の docstring）。 */
+  :root {
+    color-scheme: light;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f6f5f1;
+    --color-text-primary: #1b1b19;
+    --color-text-secondary: #46453f;
+    --color-text-tertiary: #83817a;
+    --color-border-secondary: #c8c5bc;
+    --color-border-tertiary: #e4e1d9;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+  }
+  * { -webkit-text-size-adjust: 100%; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-family: 'Noto Serif JP', Georgia, serif;
+  }
+  #root { min-height: 100dvh; }
+  .boot { max-width: 560px; margin: 0 auto; padding: 80px 24px; text-align: center;
+          font-size: 13px; color: var(--color-text-tertiary); line-height: 1.9; }
+</style>
+</head>
+<body>
+<div id="root"><div class="boot">読み込み中…<br>表示されない場合は JavaScript を有効にしてください。</div></div>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+const { useState, useEffect, useRef } = React;
+const QUESTIONS = [
+  { id: 1, axis: "TL", direction: "T", bias: 0, text: "データが示す客観的な事実と自分の感覚が食い違ったときには、自分の直感に従うようにしている" },
+  { id: 2, axis: "HS", direction: "H", bias: 0, text: "たとえ時間がかかっても、人の気持ちに働きかけることが、地域の問題の根本的な解決につながると思う" },
+  { id: 3, axis: "CI", direction: "C", bias: 0.1, text: "自分が属するコミュニティのために、個人的な利益や希望を抑えることは大切だと思う" },
+  { id: 4, axis: "OR", direction: "O", bias: 0.1, text: "努力や才能で手に入れた成果なら、収入や生活水準に大きな差がついても当然だと思う" },
+  { id: 5, axis: "CI", direction: "C", bias: 0, text: "自分の所属するコミュニティのイベントや飲み会には、積極的に参加することが大切だと思う" },
+  { id: 6, axis: "OR", direction: "O", bias: 0, text: "たとえ負ける人が出るとしても、競争は社会を良くするために必要だと思う" },
+  { id: 7, axis: "TL", direction: "T", bias: 0.1, text: "はっきり言葉にされていなくても、その場の空気や相手の様子から判断して動くことが多い" },
+  { id: 8, axis: "HS", direction: "H", bias: 0, text: "人々の意識や価値観が変わっていけば、仕組みや制度は後からついてくると思う" },
+  { id: 9, axis: "TL", direction: "L", bias: 0, text: "物事の方向を決めるときは、データや数字による根拠を大切にすべきだと思う" },
+  { id: 10, axis: "OR", direction: "R", bias: 0, text: "社会の格差を縮めるためなら、自分の経済的な負担が増えることも受け入れるべきだと思う" },
+  { id: 11, axis: "HS", direction: "S", bias: 0.1, text: "仕組みやルールを変えることで、世の中をよりよくしていきたいと思う" },
+  { id: 12, axis: "OR", direction: "R", bias: 0, text: "生まれた環境による人生の出発点の差は、社会が埋めるべきだと思う" },
+  { id: 13, axis: "CI", direction: "I", bias: 0, text: "家族や地域がどう思おうと、自分の生き方は自分の意思で決めるべきだと思う" },
+  { id: 14, axis: "HS", direction: "S", bias: 0, text: "社会や地域の問題は、人々の気持ちが変わらなくても、制度や仕組みを整えることで解決できると思う" },
+  { id: 15, axis: "CI", direction: "I", bias: 0, text: "１つの地域に長く関わり続けることは、自分の性格には向いていないと思う" },
+  { id: 16, axis: "TL", direction: "L", bias: 0, text: "取り組むことに対して、手順や計画を事前に整理してから始めるのが得意な方だと思う" }
+];
+const DIFFERENT_TYPE = {
+  TCHO: "TISR",
+  TCHR: "TISO",
+  LCHO: "LISR",
+  LCHR: "LISO",
+  TCSO: "TIHR",
+  TCSR: "TIHO",
+  LCSO: "LIHR",
+  LCSR: "LIHO",
+  TIHO: "TCSR",
+  TIHR: "TCSO",
+  LIHO: "LCSR",
+  LIHR: "LCSO",
+  TISO: "TCHR",
+  TISR: "TCHO",
+  LISO: "LCHR",
+  LISR: "LCHO"
+};
+const GROUP_INFO = {
+  CH: { label: "The Locals", jp: "里の人", sub: "集落 × 内面", color: "#2A6E45", light: "#E6F2EB", mid: "#9DCDB0", desc: "地域の歴史・文化・人間関係を大切にしながら、集落の中から変化を生み出す" },
+  CS: { label: "The Stewards", jp: "礎の人", sub: "集落 × 制度", color: "#1654A0", light: "#E0EBF8", mid: "#89AEE4", desc: "組合・行政・制度を使い、地域全体を設計・運営する" },
+  IH: { label: "The Crafters", jp: "技の人", sub: "個人 × 内面", color: "#7B4A08", light: "#F7EDD8", mid: "#D4A970", desc: "自分のペースで技を磨き、独自の価値と生き方をつくる" },
+  IS: { label: "The Movers", jp: "変革の人", sub: "個人 × 制度", color: "#4D3BB8", light: "#EBEBFB", mid: "#A099E0", desc: "ビジネス・テクノロジー・制度設計で農山漁村の課題を解決する" }
+};
+const STANCE_INFO = {
+  TO: {
+    name: "バーク型",
+    en: "Order & Self-Reliance",
+    sub: "自立・受け継ぐ",
+    alias: "受け継ぐ・自分の手で立つ・積み重ねを信じる",
+    thinker: "エドマンド・バーク（1729-1797）はフランス革命を批判し、「社会とは現在の生者だけのものではなく、過去・現在・未来の世代の契約である」と説いた。急進的な改革より、長い時間をかけて積み重ねられた慣習や制度の知恵を信頼する保守主義の源流。",
+    desc: "農山漁村に積み重ねられてきたものに敬意を払いながら、自分の力で立つことを大切にするスタンス。先人が確かめてきたやり方を信頼し、自分の手で確かめながら受け継ぐ。急いで変えるより、じっくりと積み重ねることに価値を置く。"
+  },
+  TR: {
+    name: "サンデル型",
+    en: "Communal Welfare",
+    sub: "支え合い・受け継ぐ",
+    alias: "支え合う・受け継がれた絆・誰も取り残さない",
+    thinker: "マイケル・サンデル（1953-）は「負荷なき自我」という自由主義的な人間観を批判し、人は共同体の中に埋め込まれた存在であると論じた。市場や国家より先に、地域・家族・文化的絆こそが人を支える基盤だというコミュニタリアニズムの代表的論者。伝統に無批判に従うのではなく、対話を通じて共通善を問い直すことを重視する。",
+    desc: "これまで受け継がれてきたつながりを土台に、弱い立場の人を支えることを当たり前とするスタンス。変化には慎重だが、困っている人を見過ごさない。近くにいる人が、近くにいる人を支える——その積み重ねで「誰も孤立させない農山漁村」を目指す。"
+  },
+  LO: {
+    name: "スミス型",
+    en: "Liberty & Innovation",
+    sub: "自立・考え直す",
+    alias: "考え直す・自分で試す・可能性を広げる",
+    thinker: "アダム・スミス（1723-1790）は『国富論』で、個人が自由に経済活動を行うことが「見えざる手」によって社会全体の富を生み出すと論じた。人間の共感の力を重んじる道徳哲学者でもあった。規制より自由な競争、計画より市場の自律的な調整を信頼する自由主義経済学の源流。",
+    desc: "前提を疑い、筋道を立てて考え直すことで、農山漁村の可能性を広げようとするスタンス。自分で考え、自分で試すことを重んじ、うまくいく形を見つけたら迷わず選び直す。前例がないことを理由に止まらない。"
+  },
+  LR: {
+    name: "ケインズ型",
+    en: "Social Engineering",
+    sub: "支え合い・全体で解く",
+    alias: "全体で解く・土台をつくる・取り残しをなくす",
+    thinker: "ジョン・メイナード・ケインズ（1883-1946）は市場の失敗を認め、政府による積極的な需要管理と再分配が経済の安定に不可欠だと論じた。その後ジョン・ロールズ（1921-2002）が「最も不遇な人々の利益を最大化する」格差原理で哲学的基盤を与えた。",
+    desc: "農山漁村の格差や過疎化は個人の努力の問題ではなく、全体のかたちの問題だとみなすスタンス。一人ひとりの頑張りに任せるのではなく、みんなが立てる土台をつくることを重んじる。感情論ではなく、筋道とデータで考える。"
+  }
+};
+const TYPES = {
+  TCHO: {
+    name: "地域文化の体現者",
+    group: "CH",
+    motto: "「技をきわめることが、集落の誇りになる」",
+    desc: "地域の文化・精神・伝統工芸を体現し、集落の誇りを次世代へ継承する",
+    jobs: "伝統工芸職人・郷土料理人",
+    greats: "千利休、岡倉天心、ウィリアム・モリス",
+    body: "地域の伝統工芸や郷土食の中に、あなたは単なる「もの」ではなく、長い時間をかけて積み重ねられてきた地域の精神と誇りを見ているのではないでしょうか。\n\n技を磨くことは、自分の仕事であり、地域の歴史を生きることでもある。そういう感覚が自然とあるタイプです。「守るべきものを守る」という使命感は強く、農村の暮らしを急いで「効率化」しようとする動きに、どこか落ち着かない気持ちを覚えることもあるかもしれません。",
+    diff_desc: "なりわいの継承者も「伝統を大切にする」という感覚は同じです。ただ、その感覚から「制度を使って持続させる」という結論に向かいます。あなたが「文化と精神の継承」を土台に置くのに対し、継承者は「仕組みで続けること」を先に考える。"
+  },
+  TCHR: {
+    name: "集落の守り人",
+    group: "CH",
+    motto: "「この土地の暮らしは、わたしが続ける」",
+    desc: "農・漁・林の現場に立ち、集落の絆と暮らしを内側から支える",
+    jobs: "農家・漁師・酪農家・林業従事者",
+    greats: "宮沢賢治、宮本常一、ワンガリ・マータイ",
+    body: "朝早く畑に出て、海に出て、山に入る。その繰り返しの中に、農村の暮らしを支える本当の力があると感じているのではないでしょうか。集落の人々と肩を並べて働くことそのものに、深い意味を感じているはずです。\n\n「もっと効率的に」「データで管理しよう」という外からの声に、どこか違和感を覚えることもあるかもしれません。土地と人との関係を大切にしながら、集落の絆と暮らしを内側から支えるのがあなたらしさです。",
+    diff_desc: "自立の実践者も「農を大切にする」という感覚はあります。ただ、その感覚から「制度を使って個人として自立し、新しい可能性を開く」という結論に向かいます。"
+  },
+  LCHO: {
+    name: "在野の教育者",
+    group: "CH",
+    motto: "「人が育てば、地域は自分で立ち上がる」",
+    desc: "教育・対話・体験を通じて、人の主体性と自立を育み、農山漁村と人をつなぐ",
+    jobs: "農村教育の実践者・ファシリテーター",
+    greats: "福沢諭吉、津田梅子、ペスタロッチ",
+    body: "「農村のことをもっと多くの人に知ってほしい」「子どもたちに食と農の力で自分の頭で考えられるようになってほしい」——そういう思いが、あなたの行動の根っこにあるのではないでしょうか。\n\nあなたが大切にしているのは、答えを与えることより、人が自分で考え、自分の力で立てるよう支援することです。教育・対話・体験を通じて、一人ひとりの主体性と自立を育む。農村をより開かれたものにしたいという意欲は強く、でもそのアプローチは急進的ではなく、人を信じる丁寧な積み重ねです。",
+    diff_desc: "地域の戦略家も「理性を信頼する」という姿勢は同じです。ただ、その理性から「制度と仕組みで農山漁村課題を解決する」という結論に向かいます。あなたが「人の意識が変わることで農山漁村が変わる」と信じるのに対し、戦略家は「構造を変えれば人は変わる」と考えます。"
+  },
+  LCHR: {
+    name: "里山の思想家",
+    group: "CH",
+    motto: "「暮らしの中にこそ、哲学の神髄がある」",
+    desc: "農の思想と哲学を実践し、持続可能な暮らし方を地域に根付かせる",
+    jobs: "自然農実践者・民俗文化の担い手",
+    greats: "E.F.シューマッハー、トルストイ、安藤昌益",
+    body: "農業は単なる食料生産ではなく、「どう生きるか」という問いへの答えだ——そういう感覚を持っているのではないでしょうか。有機農業や自然農を選ぶのは、流行ではなく、深い思想的な確信からです。\n\n「理想ばかり語って」と言われることもあるかもしれませんが、その理想なしに持続可能な農村はあり得ないとも感じているはずです。",
+    diff_desc: "地域経済の革新者も「理性を信頼する」という姿勢は同じです。ただ、その理性から「旧い制度を解体して新しい経済の秩序をつくる」という結論に向かいます。変革への情熱は同じなのに、どこから始めるかで世界が分かれます。"
+  },
+  TCSO: {
+    name: "まちの統率者",
+    group: "CS",
+    motto: "「先頭に立つ覚悟が、まちを動かす」",
+    desc: "地域の信頼と制度の力で、農山漁村全体を動かすリーダーシップを発揮する",
+    jobs: "市町村長・農協役員・ローカル法人の経営者",
+    greats: "上杉鷹山、エリザベス1世、ペリクレス",
+    body: "農村を動かすには、信頼と実績が必要だ。そう感じているのではないでしょうか。地域の人々が積み重ねてきた歴史と慣習への敬意を持ちながら、制度と組織の力で農村全体を変えていく。\n\n「甘いことを言っていては農村は変わらない」という現実感覚は強く、理想論より実行可能な改革を優先します。農協・行政・集落の三者をまとめて動かすことに、やりがいを感じるタイプです。",
+    diff_desc: "地域の篤志家も「経験や伝統から学ぶ」という姿勢は同じです。ただ、その姿勢から「個人の良心と使命感で直接助ける」という結論に向かいます。"
+  },
+  TCSR: {
+    name: "現場の代弁者",
+    group: "CS",
+    motto: "「農山漁村の現場の声を、世の中に届ける」",
+    desc: "農山漁村の不公正に立ち向かい、産地と地域の声を制度に届ける",
+    jobs: "地方議員・産地ブランド推進者・観光プロモーション",
+    greats: "田中正造、土光敏夫、キング牧師",
+    body: "「農村が不当に扱われている」「農家の声が政治に届いていない」——そういう強い問題意識が、あなたの行動の根っこにあるのではないでしょうか。\n\n経験と歴史から学んだ怒りを、制度・法・組織を使って変えようとします。心情に訴えるより、仕組みそのものを変えなければ農村は救えないという確信が行動の軸にあります。「きれいごとを言っている場合ではない、今動かなければ農村は終わる」という焦りを感じながら活動しているタイプかもしれません。",
+    diff_desc: "里山の探求者も「経験や歴史から学ぶ」という姿勢は同じです。ただ、その姿勢から「個人として自然の中で技と感覚を磨く」という結論に向かいます。"
+  },
+  LCSO: {
+    name: "しくみの設計者",
+    group: "CS",
+    motto: "「地域の課題は、制度設計で解決する」",
+    desc: "合理的な仕組みで農山漁村の課題を解決し、地域全体の競争力を高める",
+    jobs: "自治体職員・民宿・コワーキングスペースの運営者・地域企業のDX支援",
+    greats: "ベンジャミン・フランクリン、緒方洪庵、アレクサンダー・ハミルトン",
+    body: "「なぜこんな非効率な仕組みが農村に続いているのか」「もっと合理的に設計すれば、農村はもっとうまく機能するはず」——そういう視点で農村を見ているのではないでしょうか。\n\n役場や行政の仕組みを使いながら、6次産業化・道の駅・農村DXなど、農村の仕組みを合理的に作り直すことに強い関心があります。",
+    diff_desc: "暮らしの求道者も「理性を信頼する」という姿勢は同じです。ただ、その理性から「個人の意識変革が農山漁村再生の起点だ」という結論に向かいます。"
+  },
+  LCSR: {
+    name: "地域の調停者",
+    group: "CS",
+    motto: "「分断は、対話の不足にすぎない」",
+    desc: "移住者と地域をつなぎ、対話と制度で農山漁村の分断を超える",
+    jobs: "移住コーディネーター・地域おこし協力隊・コミュニティマネージャー",
+    greats: "坂本龍馬、ネルソン・マンデラ、エレノア・ルーズベルト",
+    body: "移住者と地元民、農家と消費者、行政と民間——農村にはたくさんの「違う立場」があります。その分断を対話でつなぎ、合意を制度に落とし込むことで、農村が持続できると信じているのではないでしょうか。\n\n「なぜもっと話し合えないのか」という歯がゆさを感じながら、それでも橋渡しをし続けるのがあなたらしさです。資金の出し手と担い手を分けることで、より多くのステークホルダーが農村に関わりやすくなる——そういう仕組みの設計にも、調停者としての視点が活きます。",
+    diff_desc: "地域の先駆者も「理性を信頼する」という姿勢は同じです。ただ、その理性から「個人が自由に挑戦できる農山漁村環境をつくることが地域を豊かにする」という結論に向かいます。"
+  },
+  TIHO: {
+    name: "里山の探求者",
+    group: "IH",
+    motto: "「答えは会議室ではなく、山の中にある」",
+    desc: "自然の中で技と感覚を磨き、誰も踏み込まない領域を切り開く",
+    jobs: "猟師・炭焼き職人・養蜂家・フリーランス",
+    greats: "松尾芭蕉、レオナルド・ダ・ヴィンチ、雪舟",
+    body: "山に入り、海に出て、自然とじっくり向き合う時間の中に、あなたは他では得られない何かを見つけているのではないでしょうか。猟師・炭焼き——そういう仕事では、組織の論理より自分の感覚と経験が頼りになります。\n\n「なぜ皆、もっと自然と向き合わないのか」という孤独感を感じることもあるかもしれません。農村の賑やかな集落活動より、静かに技を磨く時間の方が、自分らしくいられると感じるタイプです。",
+    diff_desc: "現場の代弁者も「経験や歴史から学ぶ」という姿勢は同じです。ただ、その姿勢から「共同体の不公正と制度で闘う」という結論に向かいます。"
+  },
+  TIHR: {
+    name: "地域の篤志家",
+    group: "IH",
+    motto: "「困っている人を、待たせない」",
+    desc: "個人の使命感から農山漁村の弱者に直接関わり、人の温もりで地域を温める",
+    jobs: "援農ボランティア・農村ボランティアコーディネーター・民生委員",
+    greats: "ヘレン・ケラー、杉原千畝、シュバイツァー",
+    body: "「困っている農家がいるなら、自分が動けばいい」「制度が整うのを待っていられない」——そういう使命感が、あなたの行動の根っこにあるのではないでしょうか。\n\n困っている人を放っておかない土地の気風に共鳴し、「今の農村の中で自分が何をできるか」を問い続けます。制度や仕組みに任せておくことへの物足りなさを感じるタイプかもしれません。",
+    diff_desc: "まちの統率者も「経験や伝統から学ぶ」という姿勢は同じです。ただ、その姿勢から「制度と組織で農山漁村全体を動かす」という結論に向かいます。"
+  },
+  LIHO: {
+    name: "地域の先駆者",
+    group: "IH",
+    motto: "「前例がないなら、自分が前例になる」",
+    desc: "テクノロジーと個人の自由な発想で農山漁村の常識を更新し、前例なき可能性を切り開く",
+    jobs: "農業テクノロジー事業者・農村起業家",
+    greats: "エジソン、本田宗一郎、マリー・キュリー",
+    body: "「ドローンで農薬散布すれば、農家の体力的な負担が劇的に減る」「AIで生育データを管理すれば、経験のない新規就農者でも成功できる」——そういう発想で農村を見ているのではないでしょうか。\n\n既存の農業の常識・慣習・権威を疑い、テクノロジーと個人の自由な発想で突破しようとします。「誰もやっていないなら、自分がやればいい」という内なる衝動が、あなたを前例のない場所へ押し出します。",
+    diff_desc: "地域の調停者も「理性を信頼する」という姿勢は同じです。ただ、その理性から「対話と合意で農山漁村の分断を超え、格差を縮める」という結論に向かいます。"
+  },
+  LIHR: {
+    name: "暮らしの求道者",
+    group: "IH",
+    motto: "「自分で確かめた道なら、人にも手渡せる」",
+    desc: "自らの実践と探求を通じて、同じ問いを抱える人に生き方の選択肢を手渡す",
+    jobs: "著述家・研究者・自然農法実践者・養生の実践者",
+    greats: "空海、ソロー、ファーブル",
+    body: "答えは誰かに教わるものではなく、自分の暮らしの中で確かめるものだ——そういう感覚を持っているのではないでしょうか。研究であれ、暮らしや健康のことであれ、まず自分で試し、納得できたものだけを信じる。\n\nただしその探求は、自分ひとりのためではありません。自分が確かめた道は、同じことで悩んでいる誰かの助けになる——だから書き、伝え、分かち合う。制度が届かないところで苦しんでいる人に、生き方の選択肢そのものを差し出すのがこのタイプです。",
+    diff_desc: "しくみの設計者も「理性を信頼する」という姿勢は同じです。ただ、その理性から「仕組みを整えることで多くの人を救う」という結論に向かいます。あなたが「自分が確かめた道を、目の前の一人に手渡す」ことから始めるのに対し、設計者は「全体のかたちを変える」ことから始めます。"
+  },
+  TISO: {
+    name: "自立の実践者",
+    group: "IS",
+    motto: "「道は、最初のひとりがひらく」",
+    desc: "農の伝統を受け継ぎながら、制度を使って自分の足で立ち、地域に新しい可能性を開く",
+    jobs: "新規就農者・地域資源活用起業家・道の駅運営者",
+    greats: "リンカーン、板垣退助、チャーチル",
+    body: "「農業を続けたい人が、ちゃんと続けられる仕組みを作りたい」「新しく農業を始めたい人が、自分の力で立てるようにしたい」——そういう思いが、あなたを動かしているのではないでしょうか。\n\n農の伝統と価値観を大切にしながら、制度を使って自分の足で立つ。そして、同じように自立したい人たちが動きやすい場所をつくっていく。そういう役割に自然と引き寄せられるタイプです。",
+    diff_desc: "集落の守り人も「農の伝統を大切にする」という感覚は同じです。ただ、その感覚から「集落の絆と現場の力で農山漁村を支える」という結論に向かいます。"
+  },
+  TISR: {
+    name: "なりわいの継承者",
+    group: "IS",
+    motto: "「なりわいは、過去ではなく未来の仕事だ」",
+    desc: "地域の産業と家業を次世代へつなぎ、制度を活かして持続させる",
+    jobs: "家業を継ぐ農家・地域産業の後継者・事業承継",
+    greats: "二宮尊徳、ロバート・オウエン、山田方谷",
+    body: "「この農業・林業・漁業は、自分が継がないと終わってしまう」——そういう使命感と責任感が、あなたを動かしているのではないでしょうか。それは義務ではなく、自分がそう決めたという意志です。急進的な変革は望まない。でも「守り継ぐ」ためには、仕組みと制度をうまく使わなければならないという現実感覚も持っています。\n\n「伝統を守りながら、なぜ後継者が育たないのか」というもどかしさを感じることも多いかもしれません。伝統産業の現場だけでなく、デジタルや制度の力を借りて「継ぐ」ことを可能にする——そういう新しい継承の形にも、自然と関心が向くタイプです。",
+    diff_desc: "地域文化の体現者も「伝統を大切にする」という感覚は同じです。ただ、その感覚から「文化と精神を体現することで地域の誇りを守る」という結論に向かいます。"
+  },
+  LISO: {
+    name: "地域経済の革新者",
+    group: "IS",
+    motto: "「時代に合わないルールは、書き換えればいい」",
+    desc: "農山漁村の旧い枠組みを論理で解体し、個人の自由を最大化する新しい経済の秩序をつくる",
+    jobs: "アグリテック起業家・改革する後継ぎ・農業特区活用者",
+    greats: "岩崎弥太郎、ココ・シャネル、アダム・スミス",
+    body: "「耕作放棄地があるなら、そこにビジネスチャンスがある」「農業特区を使えば、古い規制に縛られずに新しい農業ができる」——そういう発想で農村を見ているのではないでしょうか。\n\n旧来の農村の慣習・制度・権威を、論理と合理性で壊して作り直すことに強い動機を持っています。外部資本の流入や規制緩和を「脅威」ではなく「材料」として捉え、農村の新しい経済秩序を設計する——そういう発想が自然とできるタイプです。",
+    diff_desc: "里山の思想家も「理性を信頼する」という姿勢は同じです。ただ、その理性から「農の思想と意識変革で農山漁村の底上げをする」という結論に向かいます。"
+  },
+  LISR: {
+    name: "地域の戦略家",
+    group: "IS",
+    motto: "「豊かな農山漁村は、戦略的につくれる」",
+    desc: "論理と制度で農山漁村の格差と非効率を解消し、持続可能な地域経済を設計する",
+    jobs: "地域経営コンサルタント・地方創生プランナー",
+    greats: "後藤新平、ケインズ、ベヴァリッジ",
+    body: "「農村の課題は感情論で語るのではなく、データと論理で設計し直せば解決できる」——そういう確信を持っているのではないでしょうか。農村計画・地域経営コンサル・新サービスの起業など、農村の青写真を描いて実行することに情熱を注ぎます。\n\n「感情論ばかりで、なぜ合理的な設計に向かわないのか」というストレスを感じやすいタイプかもしれません。",
+    diff_desc: "在野の教育者も「理性を信頼する」という姿勢は同じです。ただ、その理性から「対話と啓蒙で農山漁村の意識を変える」という結論に向かいます。"
+  }
+};
+const EVENTS_URL = "https://college.chikyunoshigoto.com/events";
+const COURSES = {
+  TCHO: [
+    { title: "失われゆく野良着が地域の灯りになる", sub: "石徹白洋品店の実践", lecturer: "平野 馨生里", role: "石徹白洋品店 店主", url: EVENTS_URL },
+    { title: "滋味という美学──日本人が忘れた食の感性", sub: "CAFE AWAI", lecturer: "上神田 梅雄", role: "料理人", url: EVENTS_URL }
+  ],
+  TCHR: [
+    { title: "持続可能な畜産酪農〜24時間365日放牧する山地酪農", sub: "田野畑村", lecturer: "吉塚 公雄", role: "田野畑山地酪農牛乳 会長", url: EVENTS_URL },
+    { title: "100年後の森をつくる「自伐型林業」という希望", sub: "持続可能な山守のなりわい", lecturer: "中嶋 健造", role: "自伐型林業推進協会 理事長", url: EVENTS_URL }
+  ],
+  LCHO: [
+    { title: "自然環境が育む、折れない心と主体性", sub: "森のようちえんECHICA", lecturer: "葭田 昭子", role: "認定NPO法人森のECHICA 代表理事", url: EVENTS_URL },
+    { title: "探究と対話教育〜究極のプロジェクト学習と自律の精神", sub: "きのくに子どもの村学園", lecturer: "きのくに子どもの村学園", role: "", url: EVENTS_URL }
+  ],
+  LCHR: [
+    { title: "資本主義世界の「次」に現れる暮らしと仕事", sub: "里山という文明の最前線", lecturer: "内山 節", role: "哲学者", url: EVENTS_URL },
+    { title: "「神楽」という農村共同体のOS", sub: "民俗芸能が映す農村の自治と精神", lecturer: "橋本 裕之", role: "民俗学者", url: EVENTS_URL }
+  ],
+  TCSO: [
+    { title: "過疎地を経営する〜「稼ぐ自治体」の作り方", sub: "東北一攻める行政・西川町", lecturer: "菅野 大志", role: "山形県西川町 町長", url: EVENTS_URL },
+    { title: "新・湯治文化の普及〜リトリートと長期滞在", sub: "旅館大沼", lecturer: "大沼 伸治", role: "旅館大沼 五代目湯守", url: EVENTS_URL }
+  ],
+  TCSR: [
+    { title: "ふるさと住民登録制度と関係人口が変える農山漁村", sub: "都市と地方の新しい「結い」の作り方", lecturer: "高橋 博之", role: "株式会社雨風太陽 代表取締役", url: EVENTS_URL },
+    { title: "里山再生の道を探ろう〜獣害・ナラ枯れの原理", sub: "京都府美山", lecturer: "小林 正秀", role: "農学博士", url: EVENTS_URL }
+  ],
+  LCSO: [
+    { title: "「点」から「面」へ。北三陸5市町村を繋ぐ地域の人事部構想", sub: "アースカラーの広域再生グランドデザイン", lecturer: "高浜 大介", role: "NPO法人地球のしごと大學 理事長", url: EVENTS_URL },
+    { title: "ゼロウエイスト拠点運営とサーキュラーエコノミー", sub: "上勝町ゼロウエイストタウン", lecturer: "上勝町役場", role: "", url: EVENTS_URL }
+  ],
+  LCSR: [
+    { title: "地域資源の再編集。廃校のアート拠点化", sub: "西会津国際芸術村", lecturer: "矢部 佳宏", role: "一般社団法人BOOT 代表理事", url: EVENTS_URL },
+    { title: "所有と経営の分離によるローカルIPO", sub: "香川県三豊市の資金循環モデル", lecturer: "古田 秘馬", role: "株式会社umari 代表", url: EVENTS_URL }
+  ],
+  TIHO: [
+    { title: "「狩猟」の現状と課題〜ジビエ六次産業化と解体実習", sub: "猟師工房ランド・千葉県君津市", lecturer: "原田 祐介", role: "猟師工房 代表", url: EVENTS_URL },
+    { title: "魂の再生。山伏、出羽三山・修験の道を訪問", sub: "山形県庄内", lecturer: "有道智大（現地ガイド）", role: "出羽三山修験道", url: EVENTS_URL }
+  ],
+  TIHR: [
+    { title: "障碍者福祉と地域おこし〜弱さから始まる共生社会", sub: "浦河べてるの家", lecturer: "べてるの家", role: "", url: EVENTS_URL },
+    { title: "多世代共生〜分け隔てなく暮らすシェア金沢", sub: "石川県金沢市", lecturer: "シェア金沢", role: "", url: EVENTS_URL }
+  ],
+  LIHO: [
+    { title: "一次産業とテクノロジー〜稲作除草・草刈ロボット", sub: "農業機械の最前線", lecturer: "株式会社ハタケホットケ", role: "", url: EVENTS_URL },
+    { title: "海のない場所で「海産物」を育てる〜陸上養殖の事業可能性", sub: "岐阜県瑞浪市・きよら海老", lecturer: "きよら海老陸上養殖漁業グループ", role: "", url: EVENTS_URL }
+  ],
+  LIHR: [
+    { title: "地域創生の統合医療と薬草養生", sub: "予防医療と生活支援", lecturer: "山本 竜隆", role: "医師・医学博士、日本ホリスティック医学協会会長", url: EVENTS_URL },
+    { title: "障碍者福祉と地域おこし〜弱さから始まる共生社会", sub: "浦河べてるの家", lecturer: "べてるの家", role: "", url: EVENTS_URL }
+  ],
+  TISO: [
+    { title: "農山漁村の商品開発と販売〜日本一の道の駅", sub: "お茶の京都みなみやましろ村", lecturer: "森本 健次", role: "株式会社南山城 代表取締役社長", url: EVENTS_URL },
+    { title: "再生可能エネルギーによる地域おこし〜小水力発電", sub: "岐阜県郡上市石徹白", lecturer: "平野 彰秀", role: "NPO法人地域再生機構 副理事長", url: EVENTS_URL }
+  ],
+  TISR: [
+    { title: "伝統の「結」とスマートシティの融合", sub: "関係性の土壌（SPO）とCSVが循環する次世代まちづくり", lecturer: "本田 勝之助", role: "会津若松市", url: EVENTS_URL },
+    { title: "伝統工芸と地域ビジネスの革新〜「土地を纏う」体験", sub: "LOCAL WEAR・岩手県一関市", lecturer: "京谷染物店", role: "", url: EVENTS_URL }
+  ],
+  LISO: [
+    { title: "企業版ふるさと納税・各省庁施策を使い倒そう", sub: "官民連携・農水省・経産省ほか", lecturer: "小坪 拓也", role: "株式会社river 代表取締役", url: EVENTS_URL },
+    { title: "インバウンドと住民自治〜外部資本参入とジェントリフィケーション", sub: "北海道ニセコ町", lecturer: "北海道ニセコ町企画環境課", role: "", url: EVENTS_URL }
+  ],
+  LISR: [
+    { title: "地域交通の未来。公助から共助へ〜AIオンデマンド交通", sub: "香川県琴平市", lecturer: "楠木 泰二朗", role: "琴平バス株式会社 代表取締役", url: EVENTS_URL },
+    { title: "小規模地域水道という未来〜自律運営する地域水源", sub: "能登・緩速ろ過システム", lecturer: "保屋野 初子", role: "NPO法人地域水道支援センター 理事長", url: EVENTS_URL }
+  ]
+};
+const NEXT_STEPS = {
+  TCHO: { action: "家にある器を、ひとつ裏返してみる", note: "産地の名が入っているかもしれません。その土地では、いまも同じ手つきで作っている人がいます。", lead: "石徹白洋品店の平野馨生里さんほか、あなたのタイプの先輩の講座が2件" },
+  TCHR: { action: "いま旬のものを、ひとつ取り寄せる", note: "誰がどこで作ったかが書いてあります。その名前を覚えておくと、次にどこへ行きたいかが決まります。", lead: "山地酪農の吉塚公雄さんほか、あなたのタイプの先輩の講座が2件" },
+  LCHO: { action: "次の休みに誰かを連れて行くなら、どこか考えてみる", note: "自然学校でも農場でも、思ったより近くにあるものです。ひとりで行くより、連れがいたほうが遠くまで行けます。", lead: "森のようちえんの葭田昭子さんほか、あなたのタイプの先輩の講座が2件" },
+  LCHR: { action: "いつもの道で、人の手が入った風景をひとつ探す", note: "石垣、水路、手入れされた林。誰かが百年前に決めたことが、いまも形として残っています。", lead: "哲学者・内山節さんほか、あなたのタイプの先輩の講座が2件" },
+  TCSO: { action: "気になる町の道の駅を、ひとつ調べる", note: "何を売っているかで、その町が何に賭けているかが見えます。行ける距離なら、次の休みの行き先です。", lead: "西川町長・菅野大志さんほか、あなたのタイプの先輩の講座が2件" },
+  TCSR: { action: "好きな産地の魅力を、100文字で書いてみる", note: "書けたなら、あなたはもう伝える側です。書けなかったなら、まだ会っていない人がいます。", lead: "雨風太陽の高橋博之さんほか、あなたのタイプの先輩の講座が2件" },
+  LCSO: { action: "気になる町の広報を、ひとつ開く", note: "何にお金を使っているかに、その町の判断が出ます。面白ければ、現地を見に行く理由になります。", lead: "地球のしごと大學理事長・高浜大介ほか、あなたのタイプの先輩の講座が2件" },
+  LCSR: { action: "移住相談の窓口に、質問をひとつ送る", note: "まだ決めていない段階で聞いていい場所です。返事の速さと丁寧さに、その町の姿勢が出ます。", lead: "西会津国際芸術村の矢部佳宏さんほか、あなたのタイプの先輩の講座が2件" },
+  TIHO: { action: "行ってみたい山を、地図でひとつ見つける", note: "その山で何が採れるか、誰が入っているか。入口さえ分かれば、あとは足が向きます。", lead: "猟師工房の原田祐介さんほか、あなたのタイプの先輩の講座が2件" },
+  TIHR: { action: "農繁期の手伝い募集を、ひとつ眺める", note: "いつ・どこで・何人が必要とされているか。行ける日が、意外と近くにあります。", lead: "浦河べてるの家ほか、あなたのタイプの先輩の講座が2件" },
+  LIHO: { action: "空き家バンクで、気になる一軒を見つける", note: "値段と間取りと立地。「自分ならここで何をするか」を考えた時点で、それはもう構想です。まずは近くまで見に行く。", lead: "草刈ロボットのハタケホットケほか、あなたのタイプの先輩の講座が2件" },
+  LIHR: { action: "泊まってみたい宿を、ひとつ見つける", note: "水のいい土地、静かな朝。ひと晩そこにいるだけで、暮らしとして成り立つかどうかは感じ取れます。", lead: "医師・山本竜隆さんほか、あなたのタイプの先輩の講座が2件" },
+  TISO: { action: "直売所か朝市に、ひとつ行ってみる", note: "誰が何をいくらで売っているか。自分なら何を並べるかを考えると、始める場所が具体的になります。", lead: "日本一の道の駅の森本健次さんほか、あなたのタイプの先輩の講座が2件" },
+  TISR: { action: "続いている店か蔵を、ひとつ訪ねる", note: "何年続いているのか、次は誰が継ぐのか。聞けば、たいてい話してくれます。", lead: "会津若松の本田勝之助さんほか、あなたのタイプの先輩の講座が2件" },
+  LISO: { action: "よく買う地域の産品が、どう届くか辿る", note: "誰が作り、誰が運び、誰が売っているか。どこかで必ず、詰まっている場所が見つかります。", lead: "官民連携の小坪拓也さんほか、あなたのタイプの先輩の講座が2件" },
+  LISR: { action: "気になる町をふたつ、★をつけて追いかける", note: "人口も産業も違う2つの町から便りが届きます。並べて眺めていると、数字では見えなかった差が出てきます。", lead: "琴平バスの楠木泰二朗さんほか、あなたのタイプの先輩の講座が2件" }
+};
+const TAMA_PROMO = {
+  cta: "事前登録して待つ",
+  url: "#",
+  byType: {
+    TCHO: { title: "産地をたずねて、技を集める", body: "陶磁器46・織物44・漆器の産地。訪れた土地の品が棚に増え、その道の人から直接教われば師の名も残ります" },
+    TCHR: { title: "季節ごとに、その土地のものを受け取る", body: "農産物1,725件・水産物694件。行った町の旬が棚に並び、手に入れたものは誰かに贈ることもできます" },
+    LCHO: { title: "連れて行った先が、ふたりの記録になる", body: "博物館101件・遺跡207件・体験の場。同行者と別のものを選んで分け合えば、ふたり分が早く揃います" },
+    LCHR: { title: "風景の成り立ちを、たどって歩く", body: "棚田279件・社寺218件・名水222件。訪ねた場所の由来を書き残すと、それが次に来る人の道しるべになります" },
+    TCSO: { title: "よその町の売り場を、見て回る", body: "道の駅1,231件・市場39件。実際に見た記録が地図に増え、自分の町と比べられるようになります" },
+    TCSR: { title: "産地をたずねて、まだ語られていない魅力を書く", body: "全国1,741市区町村。あなたが書いた便りが、その町を知らなかった誰かに届きます" },
+    LCSO: { title: "うまく回っている仕組みを、現地で確かめる", body: "道の駅1,231件・小水力や地域交通の実装地。泊まって話を聞けば、資料には出てこない条件が分かります" },
+    LCSR: { title: "人が集まる場所に、顔を出す", body: "ゲストハウス・公民館・コワーキング。通った回数が縁として積み上がり、その町の常連として迎えられます" },
+    TIHO: { title: "人の少ない場所へ、分け入る", body: "山岳177件・樹木155件・洞窟54件。狩猟や炭焼きの技は、その土地の人から直接しか教われません" },
+    TIHR: { title: "手伝いに行った先が、地図に増える", body: "農繁期の収穫、浜の作業。受け入れ側の確認がつくので、行った記録がそのまま信頼になります" },
+    LIHO: { title: "使われていない場所を、見て回る", body: "町並み・集落249件・空き家。泊まって朝を迎えると、その土地で何ができるかが見えてきます" },
+    LIHR: { title: "水と土のいい場所に、泊まり歩く", body: "名水・湧水222件（47都道府県）・温泉68件。夜と朝を過ごした場所だけが、暮らせるかどうかを教えてくれます" },
+    TISO: { title: "自分が入れる隙間を、探して回る", body: "道の駅1,231件・直売所。売り場を見た記録が集まると、始める場所を決める材料になります" },
+    TISR: { title: "続いてきた蔵や宿を、訪ねて泊まる", body: "醸造・酒339件（20県）・温泉68件。続けている人から聞いた話が、師の記録として残ります" },
+    LISO: { title: "ものが動く場所を、見に行く", body: "卸売市場39件・漁港55件・道の駅1,231件。流れを見た記録が集まると、詰まりの場所が分かります" },
+    LISR: { title: "似た条件の町を、いくつも訪ねる", body: "全国1,741市区町村。訪ねた町が地図に並び、数字だけでは見えなかった差が比べられます" }
+  }
+};
+const LABELS = ["そう思う", "どちらかといえばそう思う", "どちらでもない", "どちらかといえばそう思わない", "そう思わない"];
+function calcResult(ans) {
+  const scores = { TL: 0, CI: 0, HS: 0, OR: 0 };
+  Object.values(ans).forEach(({ axis, direction, val, bias }) => {
+    const adjusted = 2 - val + bias;
+    if (direction === axis[0]) scores[axis] += adjusted;
+    else scores[axis] -= adjusted;
+  });
+  const T = scores.TL >= 0 ? "T" : "L";
+  const C = scores.CI >= 0 ? "C" : "I";
+  const H = scores.HS >= 0 ? "H" : "S";
+  const O = scores.OR >= 0 ? "O" : "R";
+  return { code: T + C + H + O, scores, T, C, H, O, stanceCode: T + O };
+}
+const AXIS_MAX = (() => {
+  const m = {};
+  ["TL", "CI", "HS", "OR"].forEach((ax) => {
+    let pos = 0, neg = 0;
+    QUESTIONS.filter((q) => q.axis === ax).forEach((q) => {
+      if (q.direction === ax[0]) {
+        pos += 2 + q.bias;
+        neg += 2 - q.bias;
+      } else {
+        pos += 2 - q.bias;
+        neg += 2 + q.bias;
+      }
+    });
+    m[ax] = { pos, neg };
+  });
+  return m;
+})();
+function axisPercent(ax, score) {
+  const maxSide = score >= 0 ? AXIS_MAX[ax].pos : AXIS_MAX[ax].neg;
+  const raw = Math.min(100, 50 + Math.abs(score) / maxSide * 50);
+  return { raw, display: Math.round(raw), isClose: raw < 55 };
+}
+const AXIS_DISPLAY = { TL: "判断の根拠", CI: "生きる土台", HS: "変化の起点", OR: "大切にしたい価値" };
+const AXIS_POLES = {
+  TL: { left: "直感と経験", right: "データと論理" },
+  CI: { left: "共同体", right: "個人" },
+  HS: { left: "内なる変化", right: "制度と仕組み" },
+  OR: { left: "自立と成長", right: "助け合い" }
+};
+const AXIS_POS = { TL: 0, CI: 1, HS: 2, OR: 3 };
+const ADJ_PRIORITY = ["OR", "TL", "HS", "CI"];
+function axisWaver(ax, answers) {
+  let pos = 0, neg = 0;
+  QUESTIONS.filter((q) => q.axis === ax).forEach((q) => {
+    const a = answers[q.id];
+    if (!a) return;
+    const adjusted = 2 - a.val + a.bias;
+    const contributesD1 = q.direction === ax[0] ? adjusted >= 0 : adjusted < 0;
+    if (contributesD1) pos += Math.abs(adjusted);
+    else neg += Math.abs(adjusted);
+  });
+  return Math.min(pos, neg);
+}
+const WAVER_THRESHOLD = 2;
+function pickAdjacentAxis(result, answers) {
+  const closeAxes = ["TL", "CI", "HS", "OR"].filter((ax) => axisPercent(ax, result.scores[ax]).isClose);
+  const waverAxes = ["TL", "CI", "HS", "OR"].filter((ax) => axisWaver(ax, answers) >= WAVER_THRESHOLD);
+  const candidates = closeAxes.length > 0 ? closeAxes : waverAxes;
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0];
+  const w = {};
+  candidates.forEach((ax) => {
+    w[ax] = axisWaver(ax, answers);
+  });
+  const maxW = Math.max(...candidates.map((ax) => w[ax]));
+  const tied = candidates.filter((ax) => Math.abs(w[ax] - maxW) < 1e-9);
+  return ADJ_PRIORITY.find((ax) => tied.includes(ax));
+}
+const WORK_FIELDS = {
+  TCHO: { fields: [
+    { role: "中核", cat: "民藝・ものづくり", short: "民藝", jobs: "伝統工芸職人／陶芸家／漆芸" },
+    { role: "派生", cat: "衣服・服飾", short: "衣服", jobs: "藍染・藍師／機織り・織物職人／草木染" },
+    { role: "広がり", cat: "食", short: "食", jobs: "郷土料理の担い手／造り酒屋・杜氏／和菓子職人" }
+  ], head: "移り住んで、技を受け継ぐ", body: "技は、その土地の風土と道具と人から離れては身につきません。産地に腰を据え、職人のもとで手を動かしながら覚えていく関わり方です。時間はかかりますが、覚えたものは一生ものになります。" },
+  TCHR: { fields: [
+    { role: "中核", cat: "農", short: "農", jobs: "稲作農家／有機農家／野菜農家" },
+    { role: "派生", cat: "漁", short: "漁", jobs: "定置網漁／海面養殖／素潜り漁・海女" },
+    { role: "広がり", cat: "山林", short: "山林", jobs: "自伐型林業家／特用林産／薪の生産・薪屋" }
+  ], head: "移り住んで、暮らしごと引き受ける", body: "田畑や海は、毎日そこにいる人がいなければ続きません。住まいを移し、季節の巡りに合わせて働く関わり方です。家業を継ぐ、あるいは継ぎ手のいない家から受け継ぐという入り方もあります。" },
+  LCHO: { fields: [
+    { role: "中核", cat: "教育・研究", short: "教育", jobs: "森のようちえん保育士／探究学習のファシリテーター／公民館・社会教育" },
+    { role: "派生", cat: "観光・滞在・おもてなし", short: "観光", jobs: "体験コンテンツの組成／語り部・地域ガイド／ネイチャーガイド・自然解説" },
+    { role: "広がり", cat: "まちづくり経営", short: "まちづくり", jobs: "地域の人事部／中間支援組織の運営／コミュニティマネージャー" }
+  ], head: "通いながら、人が育つ場をつくる", body: "住まいを移さなくても関われます。週末や休暇を使って通い、体験や対話の場を一緒に運営する関わり方です。回数を重ねるうちに、その土地の子どもや親と顔なじみになっていきます。" },
+  LCHR: { fields: [
+    { role: "中核", cat: "農", short: "農", jobs: "自然栽培農家／有機農家／種苗・育苗" },
+    { role: "派生", cat: "文化・言語編集", short: "文化編集", jobs: "思想・哲学／聞き書き・伝承の記録／風土記の編纂" },
+    { role: "広がり", cat: "祝祭・芸能・信仰", short: "祝祭", jobs: "民俗文化の担い手／神楽の担い手／伝統芸能の担い手" }
+  ], head: "移り住んで、暮らしと思想を重ねる", body: "考えたことを暮らしで確かめるには、その場所に住む必要があります。半分は農を、半分は書くことや教えることを——というように、複数のなりわいを組み合わせて生きる関わり方です。" },
+  TCSO: { fields: [
+    { role: "中核", cat: "自治・防災", short: "自治", jobs: "首長・地方議員／農協・漁協・森林組合の運営／自治会・区長・集落の運営" },
+    { role: "派生", cat: "まちづくり経営", short: "まちづくり", jobs: "経営戦略／地域の人事部／組織開発・自律組織" },
+    { role: "広がり", cat: "流通・販売", short: "流通", jobs: "地域商社／道の駅の運営／卸売市場" }
+  ], head: "移り住んで、組織を率いる", body: "地域を動かすには、その土地の一員として信頼を積む時間が要ります。自治体や地域法人に勤める、あるいは選ばれる立場に立つ——腰を据えて責任を負う関わり方です。" },
+  TCSR: { fields: [
+    { role: "中核", cat: "自治・防災", short: "自治", jobs: "首長・地方議員／自治体職員／農協・漁協・森林組合の運営" },
+    { role: "派生", cat: "文化・言語編集", short: "文化編集", jobs: "地域メディア／情報発信・編集／聞き書き・伝承の記録" },
+    { role: "広がり", cat: "まちづくり経営", short: "まちづくり", jobs: "広報・PR／マーケティング／観光DMO" }
+  ], head: "移り住んで、声を届ける", body: "現場の声を届けるには、その現場に住んでいることが力になります。地域に暮らしながら、議会・行政・メディアといった外に開かれた場に声を運ぶ関わり方です。" },
+  LCSO: { fields: [
+    { role: "中核", cat: "自治・防災", short: "自治", jobs: "自治体職員／防災・減災／水利組合・共有地の管理" },
+    { role: "派生", cat: "交通・インフラ", short: "交通", jobs: "地域公共交通の運行／貨客混載／除雪" },
+    { role: "広がり", cat: "エネルギー・水資源", short: "エネルギー", jobs: "小水力発電／地域電力／簡易水道・浄化槽の管理" }
+  ], head: "制度の内側に入って、仕組みを整える", body: "仕組みを変えるには、決められる場所にいる必要があります。自治体職員や地域おこし協力隊として3年関わり、そのまま定着する道もあります。外から提案するより、内側から動かす関わり方です。" },
+  LCSR: { fields: [
+    { role: "中核", cat: "まちづくり経営", short: "まちづくり", jobs: "移住コーディネーター／コミュニティマネージャー／中間支援組織の運営" },
+    { role: "派生", cat: "教育・研究", short: "教育", jobs: "公民館・社会教育／探究学習のファシリテーター／日本語教育" },
+    { role: "広がり", cat: "観光・滞在・おもてなし", short: "観光", jobs: "ゲストハウス運営／家守／体験コンテンツの組成" }
+  ], head: "制度を使って入り、人をつなぐ", body: "地域おこし協力隊や集落支援員は、よそ者が地域に入るための正面玄関です。任期のあいだに関係を作り、移住者と地元、行政と民間のあいだをつなぐ役割を担う関わり方です。" },
+  TIHO: { fields: [
+    { role: "中核", cat: "畜産・狩猟", short: "畜産・狩猟", jobs: "狩猟者／有害鳥獣対策・鳥獣管理／牧畜" },
+    { role: "派生", cat: "山林", short: "山林", jobs: "炭焼き職人／自伐型林業家／特用林産" },
+    { role: "広がり", cat: "農", short: "農", jobs: "養蜂家／自然栽培農家／麦・そば・雑穀・豆の生産" }
+  ], head: "移り住んで、山や海に深く入る", body: "獣を追い、山菜を採り、炭を焼く——その土地の自然を相手にする仕事は、通いでは身につきません。住まいを移し、自然のリズムに合わせて暮らす関わり方です。" },
+  TIHR: { fields: [
+    { role: "中核", cat: "医療・福祉", short: "医療福祉", jobs: "障碍者福祉／介護／保育・子育て支援" },
+    { role: "派生", cat: "まちづくり経営", short: "まちづくり", jobs: "ボランティア・援農のコーディネート／中間支援組織の運営／コミュニティマネージャー" },
+    { role: "広がり", cat: "資源循環・環境再生", short: "資源循環", jobs: "里山整備・草地管理／ビオトープ・環境再生／自然公園・保護区の管理" }
+  ], head: "通いながら、手を貸す", body: "移り住まなくても関われます。農繁期の収穫や浜の作業に通い、手伝いを重ねる関わり方です。回数が信頼になり、いつのまにかその町の常連として迎えられるようになります。" },
+  LIHO: { fields: [
+    { role: "中核", cat: "まちづくり経営", short: "まちづくり", jobs: "農村起業家・ローカル法人の経営／不動産・空き家バンク／まちづくりプロデューサー" },
+    { role: "派生", cat: "住居", short: "住居", jobs: "古民家再生／まちなみ保存・景観形成／建築設計・測量" },
+    { role: "広がり", cat: "農", short: "農", jobs: "自然栽培農家／花き・園芸／種苗・育苗" }
+  ], head: "移り住んで、事業を起こす", body: "前例のないことを始めるには、その土地に腰を据える必要があります。空き家や使われていない資源を自分の目で見て、地域の人と関係を作りながら、新しい事業の形を立ち上げていく関わり方です。" },
+  LIHR: { fields: [
+    { role: "中核", cat: "文化・言語編集", short: "文化編集", jobs: "文学・執筆／思想・哲学／聞き書き・伝承の記録" },
+    { role: "派生", cat: "農", short: "農", jobs: "自然栽培農家／種苗・育苗／麦・そば・雑穀・豆の生産" },
+    { role: "広がり", cat: "医療・福祉", short: "医療福祉", jobs: "薬草・養生／統合医療／ホースセラピー" }
+  ], head: "移り住んで、自分の実践を積む", body: "自分で確かめるには、暮らしそのものを移す必要があります。水や土のいい場所に身を置き、日々の実践を通じて確かめたことを、書き、伝えていく関わり方です。" },
+  TISO: { fields: [
+    { role: "中核", cat: "農", short: "農", jobs: "野菜農家／果樹農家／有機農家" },
+    { role: "派生", cat: "流通・販売", short: "流通", jobs: "道の駅の運営／移動販売・行商／産直・EC" },
+    { role: "広がり", cat: "観光・滞在・おもてなし", short: "観光", jobs: "キャンプ場・グランピング／農家民宿・農泊／体験コンテンツの組成" }
+  ], head: "移り住んで、自分のなりわいを立てる", body: "新しく始めるなら、その土地で暮らしながら育てていくことになります。就農支援や起業支援の制度を使って足場をつくり、少しずつ自分の商いを大きくしていく関わり方です。" },
+  TISR: { fields: [
+    { role: "中核", cat: "食", short: "食", jobs: "造り酒屋・杜氏／調味料づくり／和菓子職人" },
+    { role: "派生", cat: "観光・滞在・おもてなし", short: "観光", jobs: "宿・ホテルの運営／湯守・温泉の運営／農家民宿・農泊" },
+    { role: "広がり", cat: "農", short: "農", jobs: "稲作農家／果樹農家／茶農家" }
+  ], head: "家業を受け継ぐ", body: "すでにあるものを引き継ぐ関わり方です。実家を継ぐ場合も、継ぎ手のいない蔵や宿を第三者として引き受ける場合もあります。ゼロから始めるより早く、しかし守るべきものがあります。" },
+  LISO: { fields: [
+    { role: "中核", cat: "まちづくり経営", short: "まちづくり", jobs: "マーケティング／地域通貨／地域金融" },
+    { role: "派生", cat: "交通・インフラ", short: "交通", jobs: "ライドシェア・地域交通／ドローン物流／貨客混載" },
+    { role: "広がり", cat: "流通・販売", short: "流通", jobs: "産直・EC／地域商社／倉庫・物流センター" }
+  ], head: "二つの拠点を持って、仕組みを変える", body: "住まいを完全に移さず、都市と地域の両方に足場を置く関わり方です。業務委託や自分の会社として、流通や決済の仕組みそのものを組み替えることに関わります。" },
+  LISR: { fields: [
+    { role: "中核", cat: "まちづくり経営", short: "まちづくり", jobs: "経営戦略／ファイナンス／マーケティング" },
+    { role: "派生", cat: "自治・防災", short: "自治", jobs: "自治体職員／危機管理／防災・減災" },
+    { role: "広がり", cat: "流通・販売", short: "流通", jobs: "地域商社／卸売市場／産直・EC" }
+  ], head: "離れた場所から、複数の地域に関わる", body: "住まいを移さずに、専門性で関わる形です。リモートと現地訪問を組み合わせ、業務委託や副業として複数の地域の課題に同時に取り組めます。比べられることが強みになります。" }
+};
+function flipAxisInCode(code, ax) {
+  const i = AXIS_POS[ax];
+  const flipped = code[i] === ax[0] ? ax[1] : ax[0];
+  return code.slice(0, i) + flipped + code.slice(i + 1);
+}
+function DiagnosisLog({ answers, result }) {
+  const [open, setOpen] = useState(false);
+  const LABELS_SHORT = ["そう思う", "どちらかといえばそう思う", "どちらでもない", "どちらかといえばそう思わない", "そう思わない"];
+  const AXIS_NAMES = { TL: "判断の根拠", CI: "生きる土台", HS: "変化の起点", OR: "大切にしたい価値" };
+  function buildLog() {
+    const r = result;
+    const scoreLine = ["TL", "CI", "HS", "OR"].map((ax) => {
+      const s = r.scores[ax];
+      return `${ax}${s >= 0 ? "+" : ""}${s.toFixed(2)}`;
+    }).join(" / ");
+    let log = `## 診断ログ
+タイプ：${r.code}　スコア：${scoreLine}
+`;
+    const waverLine = ["TL", "CI", "HS", "OR"].map((ax) => `${ax} ${axisWaver(ax, answers).toFixed(2)}`).join(" / ");
+    log += `揺れ：${waverLine}（敗側への共感量・最大約8）
+
+`;
+    QUESTIONS.forEach((q) => {
+      const ans = answers[q.id];
+      if (!ans) return;
+      const num = String(q.id).padStart(2, "0");
+      const label = LABELS_SHORT[ans.val].padEnd(16, "　");
+      const adjusted = 2 - ans.val + ans.bias;
+      const [d1, d2] = [q.axis[0], q.axis[1]];
+      const contributesD1 = q.direction === d1 ? adjusted >= 0 : adjusted < 0;
+      const dir = contributesD1 ? d1 : d2;
+      const sign = contributesD1 ? "+" : "-";
+      log += `Q${num} ${q.axis}/${q.direction}  ${label}→ ${dir} ${sign}${Math.abs(adjusted).toFixed(2)}
+`;
+    });
+    log += "\n## 軸別集計\n";
+    ["TL", "CI", "HS", "OR"].forEach((ax) => {
+      const axQs = QUESTIONS.filter((q) => q.axis === ax);
+      const [d1, d2] = [ax[0], ax[1]];
+      const contribs = { [d1]: [], [d2]: [] };
+      axQs.forEach((q) => {
+        const ans = answers[q.id];
+        if (!ans) return;
+        const adjusted = 2 - ans.val + ans.bias;
+        const contributesD1 = q.direction === d1 ? adjusted >= 0 : adjusted < 0;
+        const dir = contributesD1 ? d1 : d2;
+        const sign = contributesD1 ? "+" : "-";
+        contribs[dir].push(`${sign}${Math.abs(adjusted).toFixed(2)}`);
+      });
+      const score = r.scores[ax];
+      const winner = score >= 0 ? d1 : d2;
+      const name = AXIS_NAMES[ax];
+      const d1str = contribs[d1].length ? contribs[d1].join(", ") : "なし";
+      const d2str = contribs[d2].length ? contribs[d2].join(", ") : "なし";
+      log += `${ax}（${name}）　→ ${winner}寄り ${score >= 0 ? "+" : ""}${score.toFixed(2)}　揺れ ${axisWaver(ax, answers).toFixed(2)}
+`;
+      log += `  ${d1}方向：${d1str}
+`;
+      log += `  ${d2}方向：${d2str}
+`;
+    });
+    return log;
+  }
+  return /* @__PURE__ */ React.createElement("div", { style: { width: "100%", maxWidth: 320 } }, /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      onClick: () => setOpen((v) => !v),
+      style: { width: "100%", padding: "13px 0", background: "transparent", color: "var(--color-text-secondary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: open ? "var(--border-radius-lg) var(--border-radius-lg) 0 0" : "var(--border-radius-lg)", fontSize: 13, cursor: "pointer" }
+    },
+    "回答ログ ",
+    open ? "▲" : "▼"
+  ), open && /* @__PURE__ */ React.createElement(
+    "textarea",
+    {
+      readOnly: true,
+      value: buildLog(),
+      onClick: (e) => e.target.select(),
+      style: { width: "100%", height: 260, padding: "12px", margin: 0, background: "var(--color-background-secondary)", color: "var(--color-text-secondary)", border: "0.5px solid var(--color-border-tertiary)", borderTop: "none", borderRadius: "0 0 var(--border-radius-lg) var(--border-radius-lg)", fontSize: 11, fontFamily: "monospace", lineHeight: 1.7, resize: "none", boxSizing: "border-box" }
+    }
+  ));
+}
+function PercentBar({ pct, anchorLeft, fill, track }) {
+  return /* @__PURE__ */ React.createElement("div", { style: { height: 9, background: track, borderRadius: 5, overflow: "hidden", display: "flex", justifyContent: anchorLeft ? "flex-start" : "flex-end" } }, /* @__PURE__ */ React.createElement("div", { style: {
+    height: "100%",
+    width: `${pct}%`,
+    background: fill,
+    borderRadius: 5,
+    transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)"
+  } }));
+}
+function SoilDots({ color }) {
+  return /* @__PURE__ */ React.createElement("svg", { width: "100%", height: "32", style: { position: "absolute", bottom: 0, left: 0, opacity: 0.12, pointerEvents: "none" }, viewBox: "0 0 400 32", preserveAspectRatio: "none" }, [...Array(40)].map((_, i) => /* @__PURE__ */ React.createElement("circle", { key: i, cx: i * 10 + 5, cy: 16 + Math.sin(i * 1.3) * 8, r: 1.5 + Math.abs(Math.sin(i * 2.1)) * 2, fill: color })));
+}
+function Chip({ children, color, bg }) {
+  return /* @__PURE__ */ React.createElement("span", { style: {
+    display: "inline-block",
+    padding: "3px 10px",
+    borderRadius: 20,
+    fontSize: 11,
+    fontWeight: 500,
+    letterSpacing: 0.3,
+    color,
+    background: bg,
+    border: `0.5px solid ${color}44`
+  } }, children);
+}
+function SectionLabel({ children }) {
+  return /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontWeight: 500, letterSpacing: 2.5, color: "var(--color-text-tertiary)", textTransform: "uppercase", marginBottom: 10 } }, children);
+}
+function Div() {
+  return /* @__PURE__ */ React.createElement("div", { style: { borderTop: "0.5px solid var(--color-border-tertiary)", margin: "20px 0" } });
+}
+function App() {
+  const [phase, setPhase] = useState("intro");
+  const [current, setCurrent] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
+  const [browsedType, setBrowsedType] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const [fadeIn, setFadeIn] = useState(true);
+  const [revealed, setRevealed] = useState(false);
+  const [prevPhase, setPrevPhase] = useState("types");
+  const [prevBrowsedType, setPrevBrowsedType] = useState(null);
+  const topRef = useRef(null);
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+  useEffect(() => {
+    var _a;
+    (_a = topRef.current) == null ? void 0 : _a.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [phase, current]);
+  function handleAnswer(val) {
+    if (transitioning) return;
+    setSelected(val);
+    setTransitioning(true);
+    setTimeout(() => {
+      setFadeIn(false);
+      const newAns = { ...answers, [q.id]: { axis: q.axis, direction: q.direction, val, bias: q.bias } };
+      setAnswers(newAns);
+      setTimeout(() => {
+        setSelected(null);
+        setTransitioning(false);
+        if (current + 1 < total) {
+          setCurrent(current + 1);
+          setFadeIn(true);
+        } else {
+          const r = calcResult(newAns);
+          setResult(r);
+          setRevealed(false);
+          setPhase("result");
+        }
+      }, 200);
+    }, 300);
+  }
+  function restart() {
+    setCurrent(0);
+    setAnswers({});
+    setResult(null);
+    setBrowsedType(null);
+    setSelected(null);
+    setFadeIn(true);
+    setTransitioning(false);
+    setPrevPhase("types");
+    setPrevBrowsedType(null);
+    setPhase("intro");
+  }
+  function startQuiz() {
+    setCurrent(0);
+    setAnswers({});
+    setResult(null);
+    setSelected(null);
+    setFadeIn(true);
+    setTransitioning(false);
+    setPhase("quiz");
+  }
+  function browseTo(code, fromPhase) {
+    const T = code[0], C = code[1], H = code[2], O = code[3];
+    setPrevBrowsedType(browsedType);
+    setBrowsedType({ code, T, C, H, O, stanceCode: T + O, scores: { TL: 0, CI: 0, HS: 0, OR: 0 } });
+    setPrevPhase(fromPhase || "types");
+    setPhase("type_detail");
+  }
+  const activeResult = phase === "result" ? result : browsedType;
+  const wrap = {
+    fontFamily: "'Noto Serif JP', 'Georgia', serif",
+    maxWidth: 560,
+    margin: "0 auto",
+    padding: "12px 16px 60px",
+    minHeight: "100dvh",
+    boxSizing: "border-box",
+    color: "var(--color-text-primary)"
+  };
+  if (phase === "intro") return /* @__PURE__ */ React.createElement("div", { style: wrap, ref: topRef }, /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center", paddingTop: 32, paddingBottom: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 4, color: "var(--color-text-tertiary)", marginBottom: 16, textTransform: "uppercase" } }, "Rural Work Type Finder"), /* @__PURE__ */ React.createElement("h1", { style: { fontSize: 22, fontWeight: 500, margin: "0 0 8px", lineHeight: 1.45, color: "var(--color-text-primary)" } }, "農山漁村のしごと", /* @__PURE__ */ React.createElement("br", null), "適性診断"), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, color: "var(--color-text-secondary)", lineHeight: 1.8, margin: "0 auto 28px", maxWidth: 380 } }, "あなたの価値観の傾向から、農山漁村での仕事・生き方の適性を16タイプで示します")), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 28 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "4つの価値観の軸"), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } }, [
+    { code: "T / L", name: "判断の根拠", left: "直感と経験", right: "データと論理", lk: "Tacit", rk: "Logic" },
+    { code: "C / I", name: "生きる土台", left: "共同体", right: "個人", lk: "Community", rk: "Individual" },
+    { code: "H / S", name: "変化の起点", left: "内なる変化", right: "制度と仕組み", lk: "Human", rk: "System" },
+    { code: "O / R", name: "大切にしたい価値", left: "自立と成長", right: "助け合い", lk: "Ownership", rk: "Reciprocity" }
+  ].map((ax) => /* @__PURE__ */ React.createElement("div", { key: ax.code, style: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "10px 12px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, fontWeight: 500, color: "#2A6E45", marginBottom: 2 } }, ax.code), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", marginBottom: 8 } }, ax.name), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 4 } }, /* @__PURE__ */ React.createElement("div", { style: { flex: 1, background: "var(--color-background-secondary)", borderRadius: 6, padding: "5px 6px", textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 9, fontWeight: 500, color: "#2A6E45" } }, ax.lk), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 9, color: "var(--color-text-tertiary)", marginTop: 1 } }, ax.left)), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", fontSize: 10, color: "var(--color-text-tertiary)", opacity: 0.5 } }, "↔"), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, background: "var(--color-background-secondary)", borderRadius: 6, padding: "5px 6px", textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 9, fontWeight: 500, color: "#1654A0" } }, ax.rk), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 9, color: "var(--color-text-tertiary)", marginTop: 1 } }, ax.right)))))), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", textAlign: "center", marginTop: 10, lineHeight: 1.6 } }, "どちらの極にも優劣はありません。引力の強さの違いにすぎません。")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 10, alignItems: "center" } }, /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      onClick: startQuiz,
+      style: {
+        width: "100%",
+        maxWidth: 320,
+        padding: "16px 0",
+        borderRadius: "var(--border-radius-lg)",
+        background: "#2A6E45",
+        color: "#fff",
+        border: "none",
+        fontSize: 16,
+        fontWeight: 500,
+        cursor: "pointer",
+        letterSpacing: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8
+      }
+    },
+    /* @__PURE__ */ React.createElement("span", null, "診断を始める"),
+    /* @__PURE__ */ React.createElement("span", { style: { fontSize: 18 } }, "→")
+  ), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", margin: 0 } }, "全16問・約5分"), /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      onClick: () => setPhase("types"),
+      style: { background: "transparent", color: "var(--color-text-secondary)", border: "0.5px solid var(--color-border-secondary)", borderRadius: "var(--border-radius-md)", padding: "10px 24px", fontSize: 13, cursor: "pointer" }
+    },
+    "16タイプ一覧を見る"
+  )));
+  if (phase === "quiz") {
+    const pct = Math.round(current / total * 100);
+    return /* @__PURE__ */ React.createElement("div", { style: wrap, ref: topRef }, /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 28 } }, /* @__PURE__ */ React.createElement("div", { style: { height: 3, background: "var(--color-background-secondary)", borderRadius: 2, overflow: "hidden", marginBottom: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { height: "100%", background: "#2A6E45", width: `${pct}%`, transition: "width 0.4s ease", borderRadius: 2 } })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--color-text-tertiary)" } }, /* @__PURE__ */ React.createElement("span", null, "Q ", current + 1, " / ", total), /* @__PURE__ */ React.createElement("span", null, "残り ", total - current, " 問"))), /* @__PURE__ */ React.createElement("div", { style: { minHeight: 96, marginBottom: 32, opacity: fadeIn ? 1 : 0, transform: fadeIn ? "translateY(0)" : "translateY(-6px)", transition: "all 0.25s ease" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 3, color: "var(--color-text-tertiary)", marginBottom: 12, textTransform: "uppercase" } }, "Question ", current + 1), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 17, lineHeight: 1.9, color: "var(--color-text-primary)", margin: 0, fontWeight: 400 } }, q.text)), /* @__PURE__ */ React.createElement("div", { style: { opacity: fadeIn ? 1 : 0, transition: "opacity 0.25s ease 0.05s" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 14, fontWeight: 500 } }, /* @__PURE__ */ React.createElement("span", null, "そう思う"), /* @__PURE__ */ React.createElement("span", null, "そう思わない")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 4px", marginBottom: 16 } }, [0, 1, 2, 3, 4].map((i) => {
+      const isSelected = selected === i;
+      const sizes = [54, 44, 36, 44, 54];
+      const sz = sizes[i];
+      const colors = ["#2A6E45", "#5CAB7D", "#888888", "#C4785A", "#C45A5A"];
+      return /* @__PURE__ */ React.createElement(
+        "button",
+        {
+          key: i,
+          onClick: () => handleAnswer(i),
+          title: LABELS[i],
+          style: {
+            width: sz,
+            height: sz,
+            borderRadius: "50%",
+            border: `2px solid ${isSelected ? colors[i] : "#BBBBBB"}`,
+            background: isSelected ? colors[i] : "#FFFFFF",
+            cursor: transitioning ? "default" : "pointer",
+            transition: "all 0.15s ease",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxSizing: "border-box",
+            boxShadow: isSelected ? "none" : "0 1px 3px rgba(0,0,0,0.10)"
+          }
+        },
+        isSelected && /* @__PURE__ */ React.createElement("span", { style: { color: "#fff", fontSize: sz > 44 ? 18 : 14, fontWeight: 600 } }, "✓")
+      );
+    })), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center", minHeight: 18, fontSize: 12, color: "var(--color-text-tertiary)" } }, selected !== null ? LABELS[selected] : "")));
+  }
+  if ((phase === "result" || phase === "type_detail") && activeResult) {
+    const r = activeResult;
+    const ti = TYPES[r.code];
+    const gi = GROUP_INFO[ti.group];
+    const stance = STANCE_INFO[r.stanceCode];
+    const diffCode = DIFFERENT_TYPE[r.code];
+    const diffInfo = TYPES[diffCode];
+    const diffGi = GROUP_INFO[diffInfo.group];
+    const isDetail = phase === "type_detail";
+    return /* @__PURE__ */ React.createElement("div", { style: wrap, ref: topRef }, isDetail && /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: () => {
+          if (prevPhase === "result") {
+            setPhase("result");
+          } else if (prevPhase === "type_detail") {
+            setBrowsedType(prevBrowsedType);
+            setPrevBrowsedType(null);
+            setPhase("type_detail");
+          } else {
+            setPhase("types");
+          }
+        },
+        style: { background: "transparent", border: "none", color: "var(--color-text-secondary)", fontSize: 13, cursor: "pointer", padding: "4px 0 20px", display: "flex", alignItems: "center", gap: 6 }
+      },
+      prevPhase === "result" ? "← 診断結果に戻る" : "← 一覧に戻る"
+    ), /* @__PURE__ */ React.createElement("div", { style: { position: "relative", overflow: "hidden", background: gi.light, borderRadius: "var(--border-radius-lg)", padding: "28px 24px 36px", marginBottom: 20, border: `0.5px solid ${gi.color}33` } }, /* @__PURE__ */ React.createElement(SoilDots, { color: gi.color }), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 4, color: gi.color, opacity: 0.6, marginBottom: 8, textTransform: "uppercase" } }, isDetail ? "Type Profile" : "Your Type"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: gi.color, letterSpacing: 4, opacity: 0.55, marginBottom: 6 } }, r.code), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 28, fontWeight: 500, color: gi.color, marginBottom: 10, lineHeight: 1.3 } }, ti.name), ti.motto && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 17, fontWeight: 500, color: gi.color, opacity: 0.9, letterSpacing: 0.3, lineHeight: 1.65, marginBottom: 8 } }, ti.motto), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, color: gi.color, opacity: 0.75, lineHeight: 1.8, margin: "0 0 16px" } }, ti.desc), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, /* @__PURE__ */ React.createElement(Chip, { color: gi.color, bg: "white" }, gi.label, "　", gi.jp), /* @__PURE__ */ React.createElement(Chip, { color: gi.color, bg: "white" }, gi.sub)), ti.greats && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 16, paddingTop: 12, borderTop: `0.5px solid ${gi.color}22` } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 11, color: gi.color, opacity: 0.55, letterSpacing: 1.5, textTransform: "uppercase" } }, "たとえるなら　"), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: gi.color, opacity: 0.8, fontStyle: "italic" } }, ti.greats))), (() => {
+      const step = NEXT_STEPS[r.code];
+      if (!step) return null;
+      const subCard = { display: "block", background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: 10, padding: "13px 13px 12px", textDecoration: "none" };
+      const subLabel = { fontSize: 10, letterSpacing: 1.5, color: "#fff", opacity: 0.65, marginBottom: 5 };
+      const subHead = { fontSize: 13.5, fontWeight: 500, color: "#fff", lineHeight: 1.5, marginBottom: 6 };
+      const subDesc = { fontSize: 11, color: "#fff", opacity: 0.8, lineHeight: 1.65, marginBottom: 8 };
+      const subGo = { fontSize: 11.5, color: "#fff", fontWeight: 500 };
+      return /* @__PURE__ */ React.createElement("div", { style: { background: gi.color, borderRadius: "var(--border-radius-lg)", padding: "18px 18px", margin: "-12px 0 20px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 2, color: "#fff", opacity: 0.7, marginBottom: 6 } }, "次の一歩"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14.5, fontWeight: 500, color: "#fff", lineHeight: 1.75, marginBottom: 7 } }, step.action), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "#fff", opacity: 0.85, lineHeight: 1.8 } }, step.note), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 } }, /* @__PURE__ */ React.createElement("a", { href: EVENTS_URL, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "まなぶ"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "先輩の話を聞く"), (COURSES[r.code] || []).map((c, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { fontSize: 10.5, color: "#fff", opacity: 0.85, lineHeight: 1.55, marginBottom: i === 0 ? 5 : 8 } }, "「", c.title, "」", /* @__PURE__ */ React.createElement("span", { style: { opacity: 0.65 } }, "（", c.lecturer, "）"))), /* @__PURE__ */ React.createElement("div", { style: subGo }, "地球のしごと大學 →")), /* @__PURE__ */ React.createElement("a", { href: TAMA_PROMO.url, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "たびする"), /* @__PURE__ */ React.createElement("div", { style: subHead }, (TAMA_PROMO.byType[r.code] || {}).title), /* @__PURE__ */ React.createElement("div", { style: subDesc }, (TAMA_PROMO.byType[r.code] || {}).body), /* @__PURE__ */ React.createElement("div", { style: subGo }, TAMA_PROMO.cta, " →"))));
+    })(), (() => {
+      const wf = WORK_FIELDS[r.code];
+      if (!wf) return null;
+      return /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: `0.5px solid ${gi.color}44`, borderLeft: `3px solid ${gi.color}`, borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "向いている領域"), wf.fields.map((f, i) => /* @__PURE__ */ React.createElement("div", { key: f.cat, style: { marginBottom: i === wf.fields.length - 1 ? 0 : 14, paddingBottom: i === wf.fields.length - 1 ? 0 : 14, borderBottom: i === wf.fields.length - 1 ? "none" : "0.5px solid var(--color-border-tertiary)" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: i === 0 ? 17 : 14, fontWeight: 500, color: gi.color, lineHeight: 1.4, marginBottom: 4 } }, f.cat), /* @__PURE__ */ React.createElement("div", { style: { fontSize: i === 0 ? 13 : 12, color: "var(--color-text-secondary)", lineHeight: 1.8 } }, f.jobs))), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", lineHeight: 1.7, margin: "14px 0 0" } }, "しごとの名前は、その領域にあるものの一例です。ほかにもたくさんあります。"), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 16, paddingTop: 16, borderTop: `0.5px solid ${gi.color}33` } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", letterSpacing: 0.5, marginBottom: 6 } }, "どう関わるか"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 500, color: gi.color, marginBottom: 6, lineHeight: 1.5 } }, wf.head), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12.5, color: "var(--color-text-secondary)", lineHeight: 1.85, margin: 0 } }, wf.body)));
+    })(), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 20 } }, ti.body.split("\n\n").map((p, i) => /* @__PURE__ */ React.createElement("p", { key: i, style: { fontSize: 14, color: "var(--color-text-primary)", lineHeight: 1.95, margin: "0 0 14px" } }, p))), !isDetail && /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "4軸のスコア"), ["TL", "CI", "HS", "OR"].map((ax) => {
+      const score = r.scores[ax];
+      const p = axisPercent(ax, score);
+      const isLeft = score >= 0;
+      const poles = AXIS_POLES[ax];
+      return /* @__PURE__ */ React.createElement("div", { key: ax, style: { marginBottom: 16 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", letterSpacing: 0.5, marginBottom: 3, textAlign: "center" } }, AXIS_DISPLAY[ax]), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 11, marginBottom: 5 } }, p.isClose ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", { style: { color: gi.color, opacity: 0.7 } }, poles.left, "　", /* @__PURE__ */ React.createElement("span", { style: { fontSize: 13 } }, isLeft ? p.display : 100 - p.display, "%")), /* @__PURE__ */ React.createElement("span", { style: { color: gi.color, opacity: 0.7 } }, poles.right, "　", /* @__PURE__ */ React.createElement("span", { style: { fontSize: 13 } }, isLeft ? 100 - p.display : p.display, "%"))) : /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", { style: { color: isLeft ? gi.color : "var(--color-text-tertiary)", fontWeight: isLeft ? 500 : 400 } }, poles.left, isLeft && /* @__PURE__ */ React.createElement("span", { style: { fontSize: 13 } }, "　", p.display, "%")), /* @__PURE__ */ React.createElement("span", { style: { color: !isLeft ? gi.color : "var(--color-text-tertiary)", fontWeight: !isLeft ? 500 : 400 } }, !isLeft && /* @__PURE__ */ React.createElement("span", { style: { fontSize: 13 } }, p.display, "%　"), poles.right))), /* @__PURE__ */ React.createElement(PercentBar, { pct: p.display, anchorLeft: isLeft, fill: p.isClose ? gi.mid : gi.color, track: gi.light }));
+    }), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 10, color: "var(--color-text-tertiary)", lineHeight: 1.6, margin: "4px 0 0", textAlign: "center" } }, "割合は回答の傾きを示すもので、能力や正しさの度合いではありません")), !isDetail && (() => {
+      const adjAxis = pickAdjacentAxis(r, answers);
+      if (!adjAxis) return null;
+      const adjCode = flipAxisInCode(r.code, adjAxis);
+      const adjType = TYPES[adjCode];
+      if (!adjType) return null;
+      const adjGi = GROUP_INFO[adjCode.slice(1, 3)];
+      return /* @__PURE__ */ React.createElement(
+        "button",
+        {
+          onClick: () => browseTo(adjCode, "result"),
+          style: {
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            background: "var(--color-background-primary)",
+            border: "0.5px solid var(--color-border-tertiary)",
+            borderRadius: "var(--border-radius-lg)",
+            padding: "14px 20px",
+            marginBottom: 20,
+            cursor: "pointer",
+            textAlign: "left",
+            fontFamily: "inherit",
+            transition: "background 0.15s"
+          },
+          onMouseEnter: (e) => e.currentTarget.style.background = "var(--color-background-secondary)",
+          onMouseLeave: (e) => e.currentTarget.style.background = "var(--color-background-primary)"
+        },
+        /* @__PURE__ */ React.createElement("div", { style: { minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "あなたの別の可能性"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 500, color: adjGi.color, marginBottom: 4 } }, adjType.name, "　", /* @__PURE__ */ React.createElement("span", { style: { fontSize: 11, color: "var(--color-text-tertiary)", fontWeight: 400, letterSpacing: 1 } }, adjCode)), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.6 } }, adjType.desc)),
+        /* @__PURE__ */ React.createElement("span", { style: { fontSize: 14, color: adjGi.color, opacity: 0.6, flexShrink: 0 } }, "→")
+      );
+    })(), isDetail && /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "4つの軸の傾向"), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } }, [
+      { label: "判断の根拠", val: r.T, tKey: "T", tL: "T 直感と経験", rL: "L データと論理" },
+      { label: "生きる土台", val: r.C, tKey: "C", tL: "C 共同体", rL: "I 個人" },
+      { label: "変化の起点", val: r.H, tKey: "H", tL: "H 内なる変化", rL: "S 制度と仕組み" },
+      { label: "大切にしたい価値", val: r.O, tKey: "O", tL: "O 自立と成長", rL: "R 助け合い" }
+    ].map((row) => /* @__PURE__ */ React.createElement("div", { key: row.label, style: { background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: "10px 12px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", marginBottom: 4 } }, row.label), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: gi.color } }, row.val === row.tKey ? row.tL : row.rL))))), stance && /* @__PURE__ */ React.createElement("div", { style: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "16px 20px", marginBottom: 20 } }, /* @__PURE__ */ React.createElement(SectionLabel, null, "目指す農山漁村のイメージ"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 18, fontWeight: 500, color: gi.color } }, stance.name), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: "var(--color-text-tertiary)" } }, stance.sub)), /* @__PURE__ */ React.createElement(Chip, { color: gi.color, bg: gi.light }, stance.alias), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, color: "var(--color-text-secondary)", lineHeight: 1.85, margin: "12px 0 0" } }, stance.desc), /* @__PURE__ */ React.createElement(Div, null), /* @__PURE__ */ React.createElement("details", null, /* @__PURE__ */ React.createElement("summary", { style: { cursor: "pointer", fontSize: 12, fontWeight: 500, letterSpacing: 1, color: "var(--color-text-secondary)", listStyle: "none" } }, "思想的源流を読む ▾"), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: "var(--color-text-tertiary)", lineHeight: 1.8, margin: "10px 0 0" } }, stance.thinker))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10 } }, isDetail ? /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: startQuiz,
+        style: { width: "100%", maxWidth: 320, padding: "15px 0", background: "#2A6E45", color: "#fff", border: "none", borderRadius: "var(--border-radius-lg)", fontSize: 15, fontWeight: 500, cursor: "pointer", letterSpacing: 1 }
+      },
+      "自分の診断を始める"
+    ) : /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", lineHeight: 1.7, textAlign: "center", margin: "0 auto 4px", maxWidth: 340 } }, "この診断は、いまのあなたの価値観の傾向を映すスナップショットです。あなたを固定するものではなく、タイプは農山漁村との関わり方の入口の一例としてお使いください。"), /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: restart,
+        style: { width: "100%", maxWidth: 320, padding: "13px 0", background: "transparent", color: "var(--color-text-primary)", border: "0.5px solid var(--color-border-secondary)", borderRadius: "var(--border-radius-lg)", fontSize: 14, cursor: "pointer" }
+      },
+      "もう一度診断する"
+    ), /* @__PURE__ */ React.createElement(DiagnosisLog, { answers, result: r }), /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: () => setPhase("types"),
+        style: { background: "transparent", color: "var(--color-text-secondary)", border: "none", fontSize: 13, cursor: "pointer", padding: "4px 0" }
+      },
+      "16タイプ一覧を見る →"
+    ))));
+  }
+  if (phase === "types") {
+    const groups = [
+      { key: "CH", types: ["TCHO", "TCHR", "LCHO", "LCHR"] },
+      { key: "CS", types: ["TCSO", "TCSR", "LCSO", "LCSR"] },
+      { key: "IH", types: ["TIHO", "TIHR", "LIHO", "LIHR"] },
+      { key: "IS", types: ["TISO", "TISR", "LISO", "LISR"] }
+    ];
+    return /* @__PURE__ */ React.createElement("div", { style: wrap, ref: topRef }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 24 } }, /* @__PURE__ */ React.createElement("button", { onClick: () => setPhase("intro"), style: { background: "transparent", border: "none", color: "var(--color-text-secondary)", fontSize: 20, cursor: "pointer", padding: "4px 8px 4px 0", lineHeight: 1 } }, "←"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 3, color: "var(--color-text-tertiary)", textTransform: "uppercase" } }, "All Types"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 18, fontWeight: 500, color: "var(--color-text-primary)", marginTop: 1 } }, "16タイプ一覧"))), groups.map(({ key, types }) => {
+      const gi = GROUP_INFO[key];
+      return /* @__PURE__ */ React.createElement("div", { key, style: { marginBottom: 28 } }, /* @__PURE__ */ React.createElement("div", { style: { background: gi.light, borderRadius: "var(--border-radius-lg)", padding: "12px 16px", marginBottom: 8, border: `0.5px solid ${gi.color}33` } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 500, color: gi.color } }, gi.label, "　", /* @__PURE__ */ React.createElement("span", { style: { fontWeight: 400 } }, gi.jp)), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: gi.color, opacity: 0.7, marginTop: 2 } }, gi.sub, "　—　", gi.desc)), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 6 } }, types.map((code) => {
+        const ti = TYPES[code];
+        const sc = STANCE_INFO[code[0] + code[3]];
+        return /* @__PURE__ */ React.createElement(
+          "button",
+          {
+            key: code,
+            onClick: () => browseTo(code),
+            style: {
+              background: "var(--color-background-primary)",
+              border: `0.5px solid var(--color-border-tertiary)`,
+              borderLeft: `3px solid ${gi.color}`,
+              borderRadius: "var(--border-radius-lg)",
+              padding: "12px 14px",
+              textAlign: "left",
+              cursor: "pointer",
+              width: "100%"
+            }
+          },
+          /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, fontWeight: 500, color: gi.color, letterSpacing: 1.5 } }, code), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" } }, sc && /* @__PURE__ */ React.createElement(Chip, { color: gi.color, bg: gi.light }, sc.name))),
+          /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)" } }, ti.name), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "詳細 →")),
+          /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginTop: 4, lineHeight: 1.6 } }, WORK_FIELDS[code] ? WORK_FIELDS[code].fields.map((f) => f.short).join("・") : ti.jobs)
+        );
+      })));
+    }), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 20 } }, /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: "var(--color-text-tertiary)", margin: "0 0 14px" } }, "あなたのタイプを知りたい方へ"), /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: startQuiz,
+        style: { width: "100%", maxWidth: 320, padding: "15px 0", background: "#2A6E45", color: "#fff", border: "none", borderRadius: "var(--border-radius-lg)", fontSize: 15, fontWeight: 500, cursor: "pointer", letterSpacing: 1 }
+      },
+      "診断を始める"
+    ), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 8 } }, "全16問・約5分")));
+  }
+  return null;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(React.StrictMode, null, React.createElement(App)));
+
+</script>
+</body>
+</html>
