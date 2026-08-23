@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>〈農〉— 21のしごと分野</title>
+<style>
+  :root{
+    --ink:#16324F;
+    --paper:#F3EFE6;
+    --card:#FFFFFF;
+    --soil:#7A5C3E;       /* 土：この分野の色（分野ごとに変わる） */
+    --grain:#C9A227;
+    --sumi:#6B6257;
+    --line:#DED6C6;
+    --serif:"Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP",serif;
+    --sans:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);line-height:1.85;font-size:15px;letter-spacing:.02em}
+  .wrap{max-width:760px;margin:0 auto;padding:0 22px 96px}
+
+  .back{display:inline-flex;gap:8px;align-items:center;margin:26px 0 0;
+    font-size:13px;color:var(--sumi);text-decoration:none;border-bottom:1px solid transparent}
+  .back:hover,.back:focus-visible{color:var(--ink);border-bottom-color:var(--ink)}
+
+  .crown{margin:38px 0 0;display:flex;align-items:baseline;gap:14px}
+  .crown .no{font-family:var(--serif);font-size:13px;letter-spacing:.28em;color:var(--soil)}
+  .crown .of{font-size:11px;letter-spacing:.22em;color:var(--sumi)}
+  .crown .grp{font-size:11px;letter-spacing:.18em;color:var(--soil);
+    background:#EDE6DA;padding:3px 10px;margin-left:auto}
+  h1{font-family:var(--serif);font-weight:600;
+    font-size:clamp(52px,15vw,88px);line-height:1;margin:.12em 0 0;letter-spacing:.04em}
+  h1 .br{color:var(--soil)}
+  .lede{font-family:var(--serif);font-size:clamp(17px,4.2vw,21px);line-height:1.9;
+    margin:20px 0 0;max-width:34em}
+  .rule{height:1px;background:var(--line);margin:44px 0}
+
+  h2{font-size:12px;letter-spacing:.2em;font-weight:600;color:var(--soil);
+    margin:0 0 18px;display:flex;align-items:center;gap:12px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .prose p{font-size:15px;line-height:1.95;margin:0 0 1.4em;max-width:36em}
+  .prose p:last-child{margin-bottom:0}
+  .pull{font-family:var(--serif);font-size:clamp(18px,4.6vw,23px);line-height:1.85;
+    color:var(--soil);border-left:3px solid var(--soil);padding:4px 0 4px 20px;margin:0 0 1.4em}
+
+  /* ── 向いている人 ── */
+  .fits{display:grid;gap:14px}
+  .fit{background:var(--card);border-left:3px solid var(--soil);padding:16px 18px}
+  .fit .h{font-weight:600;font-size:15px;display:block;margin-bottom:6px}
+  .fit p{margin:0;font-size:14px;color:var(--sumi);line-height:1.85}
+
+  /* ── 仕事モデル ── */
+  .model{background:var(--card);border:1px solid var(--line);padding:18px 20px;margin-bottom:12px}
+  .model .n{font-family:var(--serif);font-size:20px;display:block;margin-bottom:6px}
+  .model p{margin:0;font-size:14px;color:var(--sumi);line-height:1.85}
+
+  /* ── 数字 ── */
+  .figs{background:var(--card);border:1px solid var(--line);padding:6px 20px}
+  .fig{display:flex;justify-content:space-between;gap:16px;align-items:baseline;
+    padding:14px 0;border-bottom:1px dotted var(--line)}
+  .fig:last-child{border-bottom:0}
+  .fig .k{font-size:13.5px;color:var(--sumi);flex:1}
+  .fig .v{font-family:var(--serif);font-size:20px;white-space:nowrap}
+  .src{font-size:12px;color:var(--sumi);line-height:1.85;margin:14px 0 0}
+
+  /* ── 本来の価値 ── */
+  .worth{background:#EDE6DA;padding:22px 22px}
+  .worth p{margin:0 0 1.2em;font-size:14.5px;line-height:1.9}
+  .worth p:last-child{margin-bottom:0}
+  .worth b{color:var(--soil)}
+
+  /* ── 前職 ── */
+  table{width:100%;border-collapse:collapse;background:var(--card)}
+  th,td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+  th{font-size:11px;letter-spacing:.14em;color:var(--sumi);font-weight:600;white-space:nowrap}
+  td.from{color:var(--sumi);white-space:nowrap}
+  td.to b{font-weight:600}
+  tr:last-child td{border-bottom:0}
+
+  /* ── 入り口 ── */
+  .entry{background:var(--card);border:1px solid var(--line);padding:18px 20px}
+  .entry p{margin:0 0 1.1em;font-size:14px;line-height:1.9}
+  .entry p:last-child{margin-bottom:0}
+  .entry ul{margin:0 0 1.1em;padding-left:1.2em;font-size:13.5px;color:var(--sumi);line-height:1.9}
+
+  /* ── 講座 ── */
+  .course{display:block;background:var(--card);border:1px solid var(--line);
+    padding:18px 20px;text-decoration:none;color:inherit;margin-bottom:12px}
+  .course:hover,.course:focus-visible{border-color:var(--soil)}
+  .course .t{font-family:var(--serif);font-size:16.5px;line-height:1.6;display:block}
+  .course .m{font-size:12.5px;color:var(--sumi);margin-top:7px;display:block}
+
+  /* ── 次の一歩 ── */
+  .step{background:var(--ink);color:#fff;padding:30px 26px}
+  .step h3{font-family:var(--serif);font-size:20px;margin:0 0 10px;font-weight:600}
+  .step p{margin:0 0 20px;font-size:14px;color:#D6DEE7;max-width:32em}
+  .cta{display:inline-block;background:var(--grain);color:var(--ink);
+    padding:13px 26px;text-decoration:none;font-weight:600;font-size:14.5px;border-radius:2px}
+  .cta:hover,.cta:focus-visible{filter:brightness(1.07)}
+  .step small{display:block;margin-top:16px;font-size:12px;color:#95A6B8}
+
+  /* ── 近い分野・タイプ ── */
+  .near{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .near a{background:var(--card);border:1px solid var(--line);padding:16px 18px;
+    text-decoration:none;color:inherit}
+  .near a:hover,.near a:focus-visible{border-color:var(--soil)}
+  .near .n{font-family:var(--serif);font-size:19px;display:block}
+  .near .d{font-size:12.5px;color:var(--sumi);margin-top:5px;display:block}
+
+  /* ── アイデア（一年の帯） ── */
+  .idea{border:1px dashed var(--soil);background:#FBF8F2;padding:22px 22px}
+  .idea .tag{display:inline-block;font-size:10.5px;letter-spacing:.18em;color:#fff;
+    background:var(--soil);padding:3px 10px;margin-bottom:14px}
+  .idea .head{font-family:var(--serif);font-size:19px;line-height:1.7;margin:0 0 4px}
+  .idea .sub{font-size:13px;color:var(--sumi);margin:0 0 22px}
+  .year{display:grid;grid-template-columns:auto 1fr;gap:0 18px;position:relative}
+  .year::before{content:"";position:absolute;left:26px;top:6px;bottom:6px;
+    width:2px;background:linear-gradient(180deg,var(--line),var(--soil),var(--line))}
+  .mo{font-family:var(--serif);font-size:13px;color:var(--sumi);
+    padding:7px 0;width:54px;text-align:right;position:relative;z-index:1}
+  .mo.peak{color:var(--soil);font-weight:600}
+  .ev{padding:7px 0;font-size:14px;border-bottom:1px dotted var(--line)}
+  .ev:last-of-type{border-bottom:0}
+  .ev.peak{font-weight:600}
+  .idea .note{margin:22px 0 0;font-size:12.5px;color:var(--sumi);line-height:1.9}
+  .idea .note b{color:var(--ink)}
+
+  .memo{margin-top:56px;padding:16px 18px;border:1px dashed var(--line);
+    font-size:12.5px;color:var(--sumi);line-height:1.9}
+  .memo b{color:var(--ink)}
+
+  a:focus-visible,.cta:focus-visible{outline:2px solid var(--soil);outline-offset:3px}
+  @media (max-width:560px){
+    .year::before{left:22px}
+    .mo{width:46px}
+    .near{grid-template-columns:1fr}
+    .fig{flex-direction:column;gap:2px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="rural_diagnosis.html">← 診断の結果にもどる</a>
+
+  <div class="crown">
+    <span class="no">01</span><span class="of">21のしごと分野</span>
+    <span class="grp">生命と自然</span>
+  </div>
+  <h1>農<span class="br">。</span></h1>
+  <p class="lede">自らの身体を地球の循環と同調させ、生命の仕組みに直接触れる。土にまみれ、一粒の種が芽吹き実るまでに伴走する営みです。</p>
+
+  <div class="rule"></div>
+
+  <!-- ── 概要 ── -->
+  <h2>この分野について</h2>
+  <div class="prose">
+    <p>AIとロボティクスが食糧生産の基礎を担う時代に、農は「過酷な労働」でも「稼ぐための手段」でもなくなります。残るのは、人間の都合や論理が通用しない自然の理を五感で受け入れ、自らの身体と知恵で命を育てるという、圧倒的な手応えです。</p>
+    <p>日本の農は古来、各地の気候風土に適応した独自の形を発展させてきました。急斜面を切り拓いた棚田。雪の下で甘みを蓄える野菜。潮風に耐える作物の選別。それらはすべて、土地の自然資本と人間が対話を重ねてきた結晶です。</p>
+    <p>そして現代の農は、生産活動の枠を超えています。水田が天然のダムとして洪水を防ぎ、畑地が土壌の流出を止める。田植えや収穫にともなう農耕儀礼が、地域の祭りや芸能と結びつき、世代を超えて人を結ぶ。農地はすでに、地域の安全と文化を支える「命のインフラ」です。</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── どう作るか ── -->
+  <h2>どう作るか</h2>
+  <div class="prose">
+    <p>作物を何にするかと同じくらい、どう作るかにも選択肢があります。農薬や化学肥料に頼らず、土壌本来の生態系と微生物の循環を活かす自然栽培。有機JAS認証を取得し、規格に沿って栽培する有機農業。どちらも収量は不安定になりやすく、認証には手間と費用もかかります。</p>
+    <p>それでも「地球のしごと」と呼ぶ農は、こうした方向にあります。<b>土を痩せさせずに使い、生きものを増やしながら作る。</b>四つのレイヤーのうち、地球と子孫に直接届くのが、この部分だからです。</p>
+    <p>そして実際に、単価と固定客が収量の不安定さを補う例は少なくありません。手間をかけた分が値段に乗る、数少ない領域でもあります。</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── 固有性 ── -->
+  <h2>この分野だけの面白さ</h2>
+  <div class="prose">
+    <p class="pull">農には、他の分野にはない特徴がひとつあります。答えが出ないことです。</p>
+    <p>天候、土壌、微生物が複雑に絡み合うなかで、去年の正解が今年の正解とは限りません。毎年、新しい解を探し続けることになります。この終わらない試行錯誤こそが、生涯にわたる探究となります。</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── 向いている人 ── -->
+  <h2>向いている人</h2>
+  <div class="fits">
+    <div class="fit">
+      <span class="h">一年に一度しか答え合わせができないことに、耐えられる人</span>
+      <p>種を播いてから収穫まで、途中で軌道修正はほとんど効きません。今日やったことの結果が来年まで分からない状態を、苦痛ではなく当たり前と感じられるかどうかが分かれ目になります。</p>
+    </div>
+    <div class="fit">
+      <span class="h">収穫の日より、毎朝の見回りのほうが好きな人</span>
+      <p>農の時間の大半は、成果の出ない日々でできています。何も起きない朝に畑を歩くこと自体を楽しめる人に向きます。</p>
+    </div>
+    <div class="fit">
+      <span class="h">同じ場所に留まることを、退屈ではなく安心と感じる人</span>
+      <p>農地は動きません。毎日ほぼ同じ範囲を、何十年も見続けることになります。</p>
+    </div>
+    <div class="fit">
+      <span class="h">相手が思い通りに動かないとき、話し合うのではなく、自分のやり方を変えられる人</span>
+      <p>天候にも虫にも交渉は通じません。自然を相手にする仕事では、変えられるのは常に自分の側だけです。</p>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── 仕事モデル ── -->
+  <h2>主な仕事モデル</h2>
+  <p class="src" style="margin:0 0 18px">診断からいらした方へ——結果画面に出たしごとは、あなたのタイプに近いものを選んで並べたものです。<b>〈農〉のしごとは、ほかにもあります。</b></p>
+
+  <div class="model">
+    <span class="n">稲作農家</span>
+    <p>主食を作る。規模の経済が効きやすく、大区画化と機械化が進んでいる分野でもあります。一方、中山間地では小規模・高品質の路線が成り立ちます。棚田や湧水の田は、面積では勝負にならないぶん、質と物語で勝負することになります。</p>
+  </div>
+
+  <div class="model">
+    <span class="n">野菜農家・果樹農家</span>
+    <p>品目数と作付計画の設計が成否を分けます。多品目少量は直販向き、少品目多量は市場出荷向きと、販路とセットで考えます。果樹は植えてから収穫まで数年かかるため、参入の判断が重くなります。</p>
+  </div>
+
+  <div class="model">
+    <span class="n">養蜂家</span>
+    <p>蜂蜜を採るだけの仕事ではありません。花々の受粉を通じて、地域全体の動植物の循環を支えています。環境変化に敏感な蜂と暮らすことは、自然のバロメーターを守る営みでもあります。初期投資が比較的小さく、他のなりわいと組み合わせやすい。</p>
+  </div>
+
+  <div class="model">
+    <span class="n">農業機械の整備・農鍛冶</span>
+    <p>鍬や鎌を打ち、機械を直す。担い手が極めて少ない。この技術が途切れると、農の自立そのものが揺らぎます。機械いじりが好きな人にとっては、地域で最も感謝される仕事のひとつになります。</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── 入り口 ── -->
+  <h2>入り口</h2>
+  <div class="entry">
+    <p><b>研修から入るのが最も一般的です。</b>道府県の農業大学校、市町村の研修制度、先進農家への弟子入り、農業法人での雇用就農。いずれも一〜二年かけて基礎を身につけます。資格は必須ではありません。</p>
+    <p>農地を借りる・買うには農地法上の手続きが要りますが、研修先や自治体が伴走してくれる場合が多い。大型特殊免許（農耕車限定）と、けん引免許はあると動きやすくなります。</p>
+    <p>制度は使えるものが多くあります。</p>
+    <ul>
+      <li><b>就農準備資金</b>　研修期間中、月十二万五千円〜十三万七千五百円程度を最長二年間交付（年度により金額が変動します）</li>
+      <li><b>経営開始資金</b>　経営開始から最長三年間、同程度の額を交付</li>
+      <li>いずれも独立・自営就農時に四十九歳以下であることなどが条件。申請前に必ず交付主体（都道府県・市町村）に相談してください</li>
+    </ul>
+    <p><b>最初の一歩は、研修先を決める前にあります。</b>就農相談センターや自治体の窓口で話を聞き、いくつかの産地を実際に歩き、繁忙期に一週間手伝わせてもらう。作りたい作物より先に、住みたい土地を決めるほうが、結果的にうまくいくことが多い。</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── リアルな数字 ── -->
+  <h2>リアルな数字</h2>
+  <div class="figs">
+    <div class="fig"><span class="k">就農一・二年目にかかる営農費用（平均）</span><span class="v">830万円</span></div>
+    <div class="fig"><span class="k">新規就農者が用意していた自己資金（平均）<br><span style="font-size:12px">営農費用291万円＋生活費用180万円</span></span><span class="v">471万円</span></div>
+    <div class="fig"><span class="k">平均の不足額</span><span class="v">約540万円</span></div>
+    <div class="fig"><span class="k">不足分を借り入れで賄った人</span><span class="v">51.1%</span></div>
+    <div class="fig"><span class="k">制度資金（最長五年）</span><span class="v">年150〜165万円</span></div>
+    <div class="fig"><span class="k">生計が成り立つまでの目安</span><span class="v">5年</span></div>
+  </div>
+  <p class="src">出典：全国新規就農相談センター「令和3年度 新規就農者の就農実態調査」。制度資金は<b>生活費であって、事業資金ではありません。</b>裏を返せば、<b>五年は赤字か低収益が続く前提で設計する必要があります。</b><br>
+  作目・規模・地域による差が非常に大きく、ここに挙げた数値は全国平均です。個別の判断材料にはなりません。産地の普及指導員か、同じ作目の先輩農家に、実際の数字を聞いてください。</p>
+
+  <div class="rule"></div>
+
+  <!-- ── 本来の価値 ── -->
+  <h2>本来の価値</h2>
+  <div class="worth">
+    <p>この仕事の収入は、農地が生んでいる価値のごく一部しか反映していません。</p>
+    <p>日本学術会議の試算では、農業の<b>洪水防止機能は年間三兆四千九百八十八億円</b>、河川流況安定機能は一兆四千六百三十三億円、土砂崩壊防止機能は四千七百八十二億円と評価されています。水田と畑が、ダムと砂防堰堤の代わりを果たしているという計算です。</p>
+    <p>生物多様性についても同様です。環境省によれば、<b>国内で植物の絶滅危惧種が最も集中しているのは、原生林ではなく里山</b>だといいます。人が耕し、草を刈り、水を張ってきた環境にしか生きられない生きものがいる。耕作をやめた瞬間に、その環境も消えます。</p>
+    <p>さらに、農林水産省が茨城県城里町で行った調査では、後期高齢者において<b>農業者は非農業者より一人当たりの年間医療費・介護費が低い</b>ことが確認されています。</p>
+    <p><b>これらの価値に対して、支払われる対価はほとんどありません。農産物が安いことは、農の価値が低いことを意味しない。値札の側が、まだ追いついていないだけです。</b></p>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── 前職 ── -->
+  <h2>いまの仕事の、何が活きるか</h2>
+  <table>
+    <thead><tr><th>いまの仕事</th><th>この分野では</th></tr></thead>
+    <tbody>
+      <tr><td class="from">経理・財務</td><td class="to"><b>そのまま経営に直結します。</b>作付計画は原価計算であり、資金繰り表であり、投資回収の設計です。この感覚を持っている新規就農者は、驚くほど少ない</td></tr>
+      <tr><td class="from">営業・マーケティング</td><td class="to"><b>販路づくりで効きます。</b>直販、EC、飲食店との取引、会員制の直接販売。作ることより売ることで詰まる人のほうが多い</td></tr>
+      <tr><td class="from">品質管理</td><td class="to"><b>栽培記録と改善のサイクルに転用できます。</b>記録を取り、要因を分解し、翌年に反映する。製造業出身者が強い領域です</td></tr>
+      <tr><td class="from">データサイエンス</td><td class="to"><b>センサー、気象データ、圃場管理システムで活きます。</b>獣害の出没予測や作業の最適化にも応用が利く</td></tr>
+      <tr><td class="from">総務・人事</td><td class="to"><b>規模拡大の局面で効いてきます。</b>人を雇い、育て、続けてもらう。多くの農業経営が最後に詰まるのがここです</td></tr>
+    </tbody>
+  </table>
+  <p class="src">都市で身につけた技能は、農の現場では希少です。<b>捨てて来る必要はありません。持ち込むほうが強い。</b></p>
+
+  <div class="rule"></div>
+
+  <!-- ── 講座 ── -->
+  <h2>学べる講座</h2>
+  <a class="course" href="#">
+    <span class="t">一次産業とテクノロジー〜稲作除草・草刈ロボットの開発</span>
+    <span class="m">ハタケホットケ ／ 地球のしごと大學</span>
+  </a>
+  <a class="course" href="#">
+    <span class="t">農山漁村の商品開発と販売〜日本一の道の駅</span>
+    <span class="m">森本 健次 ／ 地球のしごと大學</span>
+  </a>
+
+  <div class="rule"></div>
+
+  <!-- ── 次の一歩 ── -->
+  <h2>次の一歩</h2>
+  <div class="step">
+    <h3>受けた講座が、記録になります。</h3>
+    <p>アプリに登録すると、学んだことがそのまま自分の記録として積み上がります。〈農〉をこれからやりたいしごととして挙げておくこともできます。地域から声がかかるとき、その記録が根拠になります。</p>
+    <a class="cta" href="#">アプリを見る</a>
+    <small>登録は無料です。いま登録しなくても、講座は受けられます。<br>【公開前】このボタンは、アプリの公開後に有効になります。</small>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── この分野に近いタイプ ── -->
+  <h2>この分野が近いと出るタイプ</h2>
+  <div class="near">
+    <a href="#"><span class="n">里山の探求者</span><span class="d">いちばん近い分野として〈農〉が出ます</span></a>
+    <a href="#"><span class="n">自立の実践者</span><span class="d">二番目に近い分野として〈農〉が出ます</span></a>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── 近い分野 ── -->
+  <h2>近い分野</h2>
+  <div class="near">
+    <a href="#"><span class="n">畜産・狩猟</span><span class="d">季節が一巡して、ようやく一度の答え合わせ</span></a>
+    <a href="#"><span class="n">漁</span><span class="d">その日の海で結果が出る</span></a>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ── アイデア：一年の帯 ── -->
+  <h2>ページ設計のアイデア</h2>
+  <div class="idea">
+    <span class="tag">検討中・図鑑には無い要素</span>
+    <p class="head">「この分野の時間」を、帯で見せる。</p>
+    <p class="sub">分野ごとに刻みが変わります。農は12か月、漁は1日、山林は百年、食は仕込みから出荷まで。</p>
+
+    <div class="year">
+      <div class="mo">1月</div><div class="ev">土を休ませる。来年の作付けを考える</div>
+      <div class="mo">2月</div><div class="ev">苗床の準備。種を選ぶ</div>
+      <div class="mo">3月</div><div class="ev">畑を起こす。播種がはじまる</div>
+      <div class="mo peak">4月</div><div class="ev peak">田に水を入れる。田植えの支度</div>
+      <div class="mo peak">5月</div><div class="ev peak">田植え。ここで一年が決まる</div>
+      <div class="mo">6月</div><div class="ev">草との勝負がはじまる</div>
+      <div class="mo">7月</div><div class="ev">水の管理。毎朝の見回り</div>
+      <div class="mo">8月</div><div class="ev">出穂。台風を待つ日々</div>
+      <div class="mo peak">9月</div><div class="ev peak">稲刈り。一年の答えが出る</div>
+      <div class="mo">10月</div><div class="ev">乾燥・調製・出荷</div>
+      <div class="mo">11月</div><div class="ev">来年に向けて土をつくる</div>
+      <div class="mo">12月</div><div class="ev">道具を直す。帳簿をつける</div>
+    </div>
+
+    <p class="note"><b>採否は未定です。</b>「答えが出ない」という農の固有性は本文で伝わるため、帯は無くても成立します。<br>
+    <b>懸念が2つあります。</b>①この暦は<b>稲作を前提</b>にしており、果樹・茶・養蜂は別の周期であること ②21分野ぶんの刻みを決める作業が発生すること。<br>
+    <b>採るなら、Webページ限定の要素</b>として持ちます。図鑑の紙面には入れません。</p>
+  </div>
+</div>
+</body>
+</html>
