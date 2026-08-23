@@ -88,7 +88,7 @@ const TYPES = {
     name: "集落の守り人",
     group: "NG",
     motto: "「この土地の暮らしは、わたしが続ける」",
-    desc: "海と山の現場に立ち、集落の絆と暮らしを内側から支える",
+    desc: "みなで網を上げた朝の海。声を掛け合いながら手を動かすうちに、いつのまにか自分もこの土地の一員になっている。その手応えは、ひとりでは決して得られない",
     jobs: "漁師・林業従事者・酪農家",
     greats: "二宮尊徳、宮沢賢治、ワンガリ・マータイ",
     body: "朝早く海に出て、山に入る。その繰り返しの中に、農山漁村の暮らしを支える本当の力があると感じているのではないでしょうか。共同で網を上げ、共有林の手入れに出る——そうした場に自分がいることに、意味を見いだすタイプです。\n\n相手にしているのは、人ではなく、土や水や生きものです。思いどおりにはならないし、交渉もできない。それでも毎日向き合っていれば、少しずつ応えてくれる——その感覚を知っている人です。",
@@ -98,7 +98,7 @@ const TYPES = {
     name: "里山の探求者",
     group: "NG",
     motto: "「山と海のことは、山と海が教えてくれる」",
-    desc: "ひとりで自然に入り、その土地の恵みと向き合う",
+    desc: "山が教えてくれることは、入った人にしか分からない。何年も同じ谷を歩き、同じ木を見ているうちに、誰にも真似できない目が育っていく",
     jobs: "猟師・炭焼き職人・養蜂家",
     greats: "松尾芭蕉、ソロー、南方熊楠",
     body: "誰かに教わるより、自分で入って確かめたい。猟に出る、炭を焼く、蜂を追う——応答の遅い相手と、ひとりで長く付き合うことを苦にしないタイプです。\n\n人といないと落ち着かない、ということがありません。山や海に向かう時間が、そのまま自分の時間になっている人です。",
@@ -108,7 +108,7 @@ const TYPES = {
     name: "里山の再生者",
     group: "NG",
     motto: "「荒れたものは、みなで戻せる」",
-    desc: "失われた環境を、共同の手で取り戻す",
+    desc: "涸れた沢に、水が戻る日が来る。荒れた斜面に、また草が生える。何年かかっても、その景色を自分の手で取り戻したい——そう思える人",
     jobs: "里山整備・水源保全・環境再生の担い手",
     greats: "田中正造、本多静六、ノーマン・ボーローグ",
     body: "荒れた山、涸れた水源、崩れた里山。戻すには時間と人手が要ると知っていて、それでも取りかかるタイプです。\n\nひとりでは終わらないことを、はじめから前提にしています。人を集め、手を借り、少しずつ景色を戻していく。そのやり方に、慣行の枠は必ずしも必要ないと考えている人です。",
@@ -118,7 +118,7 @@ const TYPES = {
     name: "自立の実践者",
     group: "NG",
     motto: "「前例がないなら、自分が最初になる」",
-    desc: "新しいやり方で、自然を相手に自立する",
+    desc: "前例がないからこそ、自分の答えがそのまま正解になる。誰かの指示を待たずに、ゼロから立ち上げていく面白さがここにある",
     jobs: "新規就農者・陸上養殖・農のテクノロジー",
     greats: "マリー・キュリー、ファーブル、津田仙",
     body: "慣行のやり方に縛られず、データも技術も使う。新規就農、陸上養殖、農のロボット化——ひとりで判断して始められることを、強みだと考えているタイプです。\n\n合議を待っていては間に合わない、と感じる場面が多いかもしれません。まず自分で試して、うまくいったものを見せる。それが一番早いと知っている人です。",
@@ -128,7 +128,7 @@ const TYPES = {
     name: "土地の普請人",
     group: "NM",
     motto: "「この土地の暮らしは、この土地の手でつくる」",
-    desc: "家も食も水も、みなでつくり、みなで直す",
+    desc: "自分たちで建てた家に、自分たちで引いた水が流れる。暮らしを他人まかせにせず、隣の人と一緒に、手でつくっていく",
     jobs: "大工・左官・郷土料理の担い手",
     greats: "空海、ベンジャミン・フランクリン、ロバート・オウエン",
     body: "普請とは、村で家や道をみなでつくること。大工も左官も、郷土の料理も、小さな水道も、ひとりでは成り立ちません。手を動かす場に人が集まることを、当たり前だと思っているタイプです。\n\n新しい工法より、この土地でずっとやってきたやり方を先に確かめる。それが結局いちばん長持ちすると知っている人です。",
@@ -138,9 +138,9 @@ const TYPES = {
     name: "なりわいの継承者",
     group: "NM",
     motto: "「この技は、わたしの代で途切れさせない」",
-    desc: "家業の工房で、ひとり手を動かして技を継ぐ",
+    desc: "何百年も続いてきた手つきが、いつか自分の指に宿る。教わったとおりにやり続けた先にしか、その日は来ない",
     jobs: "陶芸家・染織職人・伝統構法大工",
-    greats: "雪舟、ココ・シャネル、河井寛次郎",
+    greats: "雪舟、濱田庄司、河井寛次郎",
     body: "同じ手つきを何年も繰り返して、ようやく一人前になる世界。教わった通りにやることに抵抗がなく、自分らしさを出そうとしない。それが続けるための方法だと知っているタイプです。\n\n工房の仕事は、結局ひとりの仕事です。誰かに合わせるより、自分の手と道具に向き合う時間のほうが長い人です。",
     diff_desc: "在野の教育者も「次に渡したい」という思いは同じです。ただ、その思いから「場をひらいて人を育てる」という結論に向かいます。あなたが手わざを継ぐことに向かうのに対し、教育者は人が育つ仕組みを作ることを先に考える。"
   },
@@ -148,19 +148,19 @@ const TYPES = {
     name: "しくみの設計者",
     group: "NM",
     motto: "「暮らしを支える仕組みは、つくり直せる」",
-    desc: "水も電気も加工所も、みなで新しく組み立てる",
+    desc: "あなたが引いた一本の水路が、集落の百年を支えることになる。図面の上の線が、そのまま暮らしの土台に変わっていく",
     jobs: "小水力発電・小規模水道・地域の加工所",
     greats: "後藤新平、山田方谷、A.ハミルトン",
     body: "既存の仕組みが合わないなら、作り替えればいい。ただしひとりでは動かせないことも知っているタイプです。\n\n小水力、小規模水道、地域の加工所。人を集めて設計し、動くところまで持っていく。図面を引くだけでは終わらせない人です。",
     diff_desc: "地域の篤志家も「暮らしを支えたい」という気持ちは同じです。ただ、その気持ちから「目の前の一人に手を貸す」という結論に向かいます。あなたが仕組みを組み立てるのに対し、篤志家は個別に寄り添うことを先に考える。"
   },
   NMLI: {
-    name: "土地の発明家",
+    name: "手仕事の革新者",
     group: "NM",
     motto: "「まだ無いものを、この土地でつくる」",
-    desc: "ひとりの工房から、新しいものを世に出す",
+    desc: "まだ誰も見たことのないものが、自分の手から生まれてくる。試作を重ねた分だけ、世界にひとつだけの形に近づいていく",
     jobs: "クラフト作家・新しい民藝・地域の技術者",
-    greats: "エジソン、本田宗一郎、レオナルド・ダ・ヴィンチ",
+    greats: "ココ・シャネル、ウィリアム・モリス、柳宗理",
     body: "頭の中にある形を、そのとおりに仕上げたい。試作を重ねる時間を惜しまないタイプです。\n\n新しいクラフト、新しい織り、地域の技術。前例がないことを不安ではなく面白さとして受け取る人です。自分の判断で完結することを好みます。",
     diff_desc: "地域文化の体現者も「かたちに込める」という感覚は同じです。ただ、その感覚から「継いできた型を守る」という結論に向かいます。あなたがまだ無いものを作るのに対し、体現者はすでにあるものを継ぐことを先に考える。"
   },
@@ -168,17 +168,17 @@ const TYPES = {
     name: "地域文化の体現者",
     group: "HG",
     motto: "「この土地の時間は、みなで回す」",
-    desc: "祭りと年中行事を、共同体とともに継ぐ",
+    desc: "千年続いてきた祭りの、次の一年を担う。その列に自分が立ったとき、この土地の時間が、はじめて自分の時間になる",
     jobs: "神楽の担い手・伝統芸能・宮司",
     greats: "千利休、キング牧師、岡倉天心",
     body: "祭りも神楽も、ひとりでは成り立ちません。一年に一度しか巡ってこない場を、みなで守り続ける。その繰り返しの中に、土地の精神が宿っていると感じているタイプです。\n\n形を変えることには慎重です。変えた瞬間に、続いてきたものが切れてしまうと知っているからです。",
-    diff_desc: "土地の発明家も「かたちをつくる」という感覚は同じです。ただ、その感覚から「まだ無いものを生む」という結論に向かいます。あなたが受け継いだ型を守るのに対し、発明家は前例のないものを作ることを先に考える。"
+    diff_desc: "手仕事の革新者も「かたちをつくる」という感覚は同じです。ただ、その感覚から「まだ無いものを生む」という結論に向かいます。あなたが受け継いだ型を守るのに対し、発明家は前例のないものを作ることを先に考える。"
   },
   HGTI: {
     name: "地域の篤志家",
     group: "HG",
     motto: "「困っている人が、目の前にいる」",
-    desc: "ひとりで、人の暮らしに寄り添う",
+    desc: "あなたがいたから、あの人はここに住み続けられた——いつかそう言われる日が来る。数字には出ないが、確かに残る仕事",
     jobs: "民生委員・見守り・援農の担い手",
     greats: "杉原千畝、ヘレン・ケラー、シュバイツァー",
     body: "制度や仕組みを動かす前に、まず目の前の一人に手を貸すタイプです。見守り、援農、付き添い。成果が数字にならなくても、続けられる人です。\n\n誰かに頼まれたからではなく、気づいてしまったから動く。その積み重ねが、地域では最も効いていることを知っています。",
@@ -188,7 +188,7 @@ const TYPES = {
     name: "在野の教育者",
     group: "HG",
     motto: "「人が育てば、地域は自分で立ち上がる」",
-    desc: "人が育つ場を、新しく、みなでつくる",
+    desc: "子どもが自分の頭で考えはじめる、その瞬間に立ち会える。何年かあとに帰ってきて「あのときの」と言われる、長い仕事",
     jobs: "自然学校・食農教育・探究学習",
     greats: "福沢諭吉、津田梅子、ペスタロッチ",
     body: "既存の教育の形にこだわらず、自然の中に、地域の中に学びの場をつくるタイプです。子どもが育つのは年単位であることを承知のうえで、場を開き続ける人です。\n\n答えを与えることより、人が自分で考え、自分の力で立てるようにすることを大切にしています。",
@@ -198,7 +198,7 @@ const TYPES = {
     name: "暮らしの求道者",
     group: "HG",
     motto: "「自分の暮らしで、確かめる」",
-    desc: "ひとりで問い、ひとりで人に向き合う",
+    desc: "自分の暮らしが、そのまま答えになる。誰かの受け売りではなく、自分の身体で確かめたことだけを、人に手渡していける",
     jobs: "統合医療・薬草養生・探究と著述",
     greats: "トルストイ、緒方洪庵、安藤昌益",
     body: "考えたことを、自分の暮らしで確かめたいタイプです。統合医療、薬草、探究——答えが出るまで待てる人です。\n\n人に向き合いながら、その根拠は自分で組み立てる。誰かの決めた枠組みをそのまま使うことに、どこか落ち着かなさを覚えるかもしれません。",
@@ -208,7 +208,7 @@ const TYPES = {
     name: "まちの統率者",
     group: "HM",
     motto: "「この町のことは、この町で決める」",
-    desc: "組織を率い、まちの仕組みを守り継ぐ",
+    desc: "この町をどうするかを、この町で決める。その決定の場に自分が座り、次の世代に渡すものを選んでいく",
     jobs: "首長・農協役員・自治会",
     greats: "上杉鷹山、エリザベス1世、ペリクレス",
     body: "地域を動かすには、その土地の一員として信頼を積む時間が要ります。任期と年度で回る世界で、責任を負う立場に立つことを引き受けられるタイプです。\n\n新しさより、続いてきたことを大切にします。積み上げてきたものを壊さずに、少しずつ動かしていく人です。",
@@ -218,7 +218,7 @@ const TYPES = {
     name: "土地の思想家",
     group: "HM",
     motto: "「語られなかったことを、書き残す」",
-    desc: "ひとりで、土地の記憶をかたちにする",
+    desc: "あなたが書き留めなければ、消えてしまう話がある。その一冊が、百年後にこの土地を知る唯一の手がかりになるかもしれない",
     jobs: "聞き書き・著述・地域メディア",
     greats: "柳宗悦、宮本常一、E.F.シューマッハー",
     body: "聞き書き、著述、民俗の記録。何年もかけて一冊になる世界で、ひとり黙々と手を動かすタイプです。\n\n誰かが残さなければ消えてしまうものがあると知っています。目の前の暮らしを、言葉というかたちに移していく人です。",
@@ -228,7 +228,7 @@ const TYPES = {
     name: "まちの仕掛け人",
     group: "HM",
     motto: "「まちは、動かせる」",
-    desc: "新しい仕組みを、みなで立ち上げる",
+    desc: "三年後、この町に人が集まっている。きっかけは、あなたが動いたこと。人と人のあいだに立てる人にしか、それは起こせない",
     jobs: "移住コーディネーター・中間支援・地域商社",
     greats: "坂本龍馬、ネルソン・マンデラ、板垣退助",
     body: "移住のコーディネート、中間支援、地域商社。人と人のあいだに立って、まだ無い仕組みを作るタイプです。\n\nひとりでは動かないことを前提に、巻き込む力を持っています。話が通じない相手にも、まず会いに行く人です。",
@@ -238,7 +238,7 @@ const TYPES = {
     name: "地域の戦略家",
     group: "HM",
     motto: "「数字で見れば、打ち手はある」",
-    desc: "ひとりの判断で、まちの経営を設計する",
+    desc: "数字の裏に、まだ誰も見つけていない打ち手がある。それを見つけて動かせたとき、町の景色が変わりはじめる",
     jobs: "地域経営コンサル・地域金融・特区",
     greats: "岩崎弥太郎、ケインズ、アダム・スミス",
     body: "データと制度を組み合わせて、地域の経営を組み立てるタイプです。数字はすぐ返る世界で、自分の判断で意思決定することを厭わない人です。\n\n現場に張りつくより、離れた場所から複数の地域を見比べるほうが、見えるものがあると考えています。",
@@ -246,6 +246,7 @@ const TYPES = {
   }
 };
 const EVENTS_URL = "https://college.chikyunoshigoto.com/events";
+const ZUKAN_URL = "field_01_nou.html";
 const CATEGORIES = {
   1: { name: "農", short: "農", hn: -2, gm: -2, tl: -1, ci: -2 },
   2: { name: "山林", short: "山林", hn: -2, gm: -2, tl: -2, ci: -1 },
@@ -278,12 +279,12 @@ const TYPE_JOBS = {
   NMTI: { 8: "陶芸家／漆芸（塗り・蒔絵）／木彫・木地師", 6: "藍染・藍師／機織り・織物職人／和裁・着物の仕立て", 7: "建具・襖・畳／檜皮葺・杮葺（檜皮採取を含む）／石工（石積み）" },
   NMLC: { 16: "小水力発電／バイオマス・熱利用／地域電力（太陽光）", 7: "古民家再生／まちなみ保存・景観形成（重伝建）／建築設計・測量", 21: "IoT／業務改善・DX／GIS・地理空間情報" },
   NMLI: { 6: "アクセサリー作家／鞄職人／革職人", 8: "造形作家／ガラス工芸／民藝の作り手", 7: "アースバッグ建築／ログビルダー／造園・庭師" },
-  HGTC: { 14: "伝統芸能の担い手／宮司・神職／民俗文化の担い手", 10: "郷土史・歴史教育／公民館・社会教育／博物学・学芸員", 12: "武道の指導／地域スポーツ指導員／トレッキングガイド" },
+  HGTC: { 14: "伝統芸能の担い手／宮司・神職／民俗文化の担い手", 10: "郷土史・歴史教育／公民館・社会教育／博物学・学芸員", 12: "武道の指導／地域スポーツ指導員（野球・サッカー・バスケなど）／トレッキングガイド" },
   HGTI: { 11: "ケアワーカー／看護師・訪問看護／障碍者福祉", 14: "葬送・墓守／僧侶／冠婚葬祭・式典の運営", 12: "トレイルランニング／サイクリング・自転車／ロッククライミング指導" },
-  HGLC: { 10: "森のようちえん保育士／探究学習のファシリテーター／学童・放課後の居場所", 13: "体験コンテンツの組成／ネイチャーガイド・自然解説（インタープリター）／農家民宿・農泊", 14: "祭りプロデューサー／音楽・演奏／ダンス" },
-  HGLI: { 11: "統合医療／薬草・養生／ホースセラピー", 13: "ゲストハウス運営／湯守・温泉の運営／語り部・地域ガイド", 12: "サーフィン指導・ガイド／山岳ガイド／カヤック・SUP・ラフティング" },
+  HGLC: { 10: "森のようちえん保育士／探究学習のファシリテーター／学童・放課後の居場所", 13: "体験コンテンツの組成／ネイチャーガイド・自然解説（インタープリター）／農家民宿・農泊", 14: "祭り・イベントプロデューサー／音楽・演奏／祭具・神具の製作（提灯・太鼓・山車）" },
+  HGLI: { 11: "統合医療医師／薬草・養生／ホースセラピー", 13: "ゲストハウス運営（家守）／湯守・温泉の運営／語り部・地域ガイド", 12: "サーフィン指導・ガイド／山岳ガイド／カヤック・SUP・ラフティング" },
   HMTC: { 17: "地域公共交通の運行（バス・タクシー）／道普請／除雪", 18: "自治会・区長・集落の運営／農協・漁協・森林組合の運営／首長・地方議員", 9: "道の駅の運営／卸売市場／まちの小売（肉屋・魚屋・八百屋）" },
-  HMTI: { 15: "聞き書き・伝承の記録／風土記の編纂／文学・執筆", 9: "移動販売・行商／雑貨店・セレクトショップ／エシカルショップ・コンビニ", 8: "伝統工芸職人／文具（筆・墨・硯・そろばん）／装潢修理（書画・典籍の修理）" },
+  HMTI: { 15: "聞き書き・伝承の記録／風土記の編纂／書道", 9: "移動販売・行商／雑貨店・セレクトショップ／エシカルショップ・コンビニ", 8: "伝統工芸職人／文具（筆・墨・硯・そろばん）／装潢修理（書画・典籍の修理）" },
   HMLC: { 20: "移住コーディネーター／中間支援組織の運営／まちづくりプロデューサー", 9: "地域商社／産直・EC（オンライン直販）／日用品店", 21: "ソフトウェア開発（Web・アプリ）／業務改善・DX／ネットワーク・通信" },
   HMLI: { 9: "倉庫・物流センター／産直・EC（オンライン直販）／地域商社", 21: "AI活用・AX／データセンター運営／情報セキュリティ", 15: "情報発信・編集／地域メディア（ローカル紙・コミュニティFM・CATV）／アーカイブ・デジタル保存" }
 };
@@ -346,7 +347,7 @@ const COURSES = {
   HMLC: [{ title: "「点」から「面」へ。地域の人事部構想", by: "高浜 大介" }, { title: "ふるさと住民登録制度と関係人口", by: "高橋 博之" }],
   HMLI: [{ title: "インバウンドと住民自治〜ジェントリフィケーション", by: "ニセコ町" }, { title: "企業版ふるさと納税・各省庁施策を使い倒そう", by: "小坪 拓也" }]
 };
-const NEXT_STEP_ACTION = "向いているかどうかは、動いた人にしか分かりません。まず一歩、動いてみてください。記録は、あとからついてきます。";
+const NEXT_STEP_ACTION = "向いているかどうかは、動いた人にしか分かりません。まず一歩、動いてみてください。結果は、あとからついてきます。";
 const NEXT_STEPS = {
   NGTC: { lead: "自伐型林業の中嶋健造さんほか、あなたのタイプの先輩の講座が2件" },
   NGTI: { lead: "狩猟・ジビエの原田祐介さんほか、あなたのタイプの先輩の講座が2件" },
@@ -790,15 +791,6 @@ function App() {
       },
       prevPhase === "result" ? "← 診断結果に戻る" : "← 一覧に戻る"
     ), /* @__PURE__ */ React.createElement("div", { style: { position: "relative", overflow: "hidden", background: gi.light, borderRadius: "var(--border-radius-lg)", padding: "28px 24px 36px", marginBottom: 20, border: `0.5px solid ${gi.color}33` } }, /* @__PURE__ */ React.createElement(SoilDots, { color: gi.color }), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 4, color: gi.color, opacity: 0.6, marginBottom: 8, textTransform: "uppercase" } }, isDetail ? "Type Profile" : "Your Type"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: gi.color, letterSpacing: 4, opacity: 0.55, marginBottom: 6 } }, r.code), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 28, fontWeight: 500, color: gi.color, marginBottom: 10, lineHeight: 1.3 } }, ti.name), ti.motto && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 17, fontWeight: 500, color: gi.color, opacity: 0.9, letterSpacing: 0.3, lineHeight: 1.65, marginBottom: 8 } }, ti.motto), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, color: gi.color, opacity: 0.75, lineHeight: 1.8, margin: "0 0 16px" } }, ti.desc), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, /* @__PURE__ */ React.createElement(Chip, { color: gi.color, bg: "white" }, gi.label, "　", gi.jp, "を相手にする人"), /* @__PURE__ */ React.createElement(Chip, { color: gi.color, bg: "white" }, AXIS_POLES.TL[r.T === "T" ? "left" : "right"], " × ", AXIS_POLES.CI[r.C === "C" ? "left" : "right"])), ti.greats && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 16, paddingTop: 12, borderTop: `0.5px solid ${gi.color}22` } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 11, color: gi.color, opacity: 0.55, letterSpacing: 1.5, textTransform: "uppercase" } }, "たとえるなら　"), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: gi.color, opacity: 0.8, fontStyle: "italic" } }, ti.greats))), (() => {
-      const step = NEXT_STEPS[r.code];
-      if (!step) return null;
-      const subCard = { display: "block", background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: 10, padding: "13px 13px 12px", textDecoration: "none" };
-      const subLabel = { fontSize: 10, letterSpacing: 1.5, color: "#fff", opacity: 0.65, marginBottom: 5 };
-      const subHead = { fontSize: 13.5, fontWeight: 500, color: "#fff", lineHeight: 1.5, marginBottom: 6 };
-      const subDesc = { fontSize: 11, color: "#fff", opacity: 0.8, lineHeight: 1.65, marginBottom: 8 };
-      const subGo = { fontSize: 11.5, color: "#fff", fontWeight: 500 };
-      return /* @__PURE__ */ React.createElement("div", { style: { background: gi.color, borderRadius: "var(--border-radius-lg)", padding: "18px 18px", margin: "-12px 0 20px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 2, color: "#fff", opacity: 0.7, marginBottom: 6 } }, "次の一歩"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, color: "#fff", lineHeight: 1.85, marginBottom: 4 } }, NEXT_STEP_ACTION), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 } }, /* @__PURE__ */ React.createElement("a", { href: EVENTS_URL, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "まなぶ"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "先輩の話を聞く"), (COURSES[r.code] || []).map((c, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { fontSize: 10.5, color: "#fff", opacity: 0.85, lineHeight: 1.55, marginBottom: i === 0 ? 5 : 8 } }, "「", c.title, "」", c.by && /* @__PURE__ */ React.createElement("span", { style: { opacity: 0.65 } }, "（", c.by, "）"))), /* @__PURE__ */ React.createElement("div", { style: subGo }, "地球のしごと大學 →")), /* @__PURE__ */ React.createElement("div", { style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "たしかめる"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "向いている分野を見る"), /* @__PURE__ */ React.createElement("div", { style: subDesc }, workFields(r.code).map((f) => `〈${f.cat}〉`).join(""), "。そこにどんなしごとがあり、どんな時間が流れているか。読んでから決められる"), /* @__PURE__ */ React.createElement("div", { style: subGo }, "分野のページへ →"))));
-    })(), (() => {
       const fields = workFields(r.code);
       if (!fields.length) return null;
       const how = howToEngage(r);
@@ -847,7 +839,16 @@ function App() {
       { label: AXIS_DISPLAY.GM, val: r.G, tKey: "G", tL: `G ${AXIS_POLES.GM.left}`, rL: `M ${AXIS_POLES.GM.right}` },
       { label: AXIS_DISPLAY.TL, val: r.T, tKey: "T", tL: `T ${AXIS_POLES.TL.left}`, rL: `L ${AXIS_POLES.TL.right}` },
       { label: AXIS_DISPLAY.CI, val: r.C, tKey: "C", tL: `C ${AXIS_POLES.CI.left}`, rL: `I ${AXIS_POLES.CI.right}` }
-    ].map((row) => /* @__PURE__ */ React.createElement("div", { key: row.label, style: { background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: "10px 12px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", marginBottom: 4 } }, row.label), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: gi.color } }, row.val === row.tKey ? row.tL : row.rL))))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10 } }, isDetail ? /* @__PURE__ */ React.createElement(
+    ].map((row) => /* @__PURE__ */ React.createElement("div", { key: row.label, style: { background: "var(--color-background-secondary)", borderRadius: "var(--border-radius-md)", padding: "10px 12px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: "var(--color-text-tertiary)", marginBottom: 4 } }, row.label), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: gi.color } }, row.val === row.tKey ? row.tL : row.rL))))), (() => {
+      const step = NEXT_STEPS[r.code];
+      if (!step) return null;
+      const subCard = { display: "block", background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: 10, padding: "13px 13px 12px", textDecoration: "none" };
+      const subLabel = { fontSize: 10, letterSpacing: 1.5, color: "#fff", opacity: 0.65, marginBottom: 5 };
+      const subHead = { fontSize: 13.5, fontWeight: 500, color: "#fff", lineHeight: 1.5, marginBottom: 6 };
+      const subDesc = { fontSize: 11, color: "#fff", opacity: 0.8, lineHeight: 1.65, marginBottom: 8 };
+      const subGo = { fontSize: 11.5, color: "#fff", fontWeight: 500 };
+      return /* @__PURE__ */ React.createElement("div", { style: { background: gi.color, borderRadius: "var(--border-radius-lg)", padding: "18px 18px", margin: "8px 0 20px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, letterSpacing: 2, color: "#fff", opacity: 0.7, marginBottom: 6 } }, "次の一歩"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, color: "#fff", lineHeight: 1.85, marginBottom: 4 } }, NEXT_STEP_ACTION), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 } }, /* @__PURE__ */ React.createElement("a", { href: EVENTS_URL, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "まなぶ"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "先輩の話を聞く"), (COURSES[r.code] || []).map((c, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { fontSize: 10.5, color: "#fff", opacity: 0.85, lineHeight: 1.55, marginBottom: i === 0 ? 5 : 8 } }, "「", c.title, "」", c.by && /* @__PURE__ */ React.createElement("span", { style: { opacity: 0.65 } }, "（", c.by, "）"))), /* @__PURE__ */ React.createElement("div", { style: subGo }, "地球のしごと大學 →")), /* @__PURE__ */ React.createElement("a", { href: ZUKAN_URL, target: "_blank", rel: "noopener noreferrer", style: subCard }, /* @__PURE__ */ React.createElement("div", { style: subLabel }, "たしかめる"), /* @__PURE__ */ React.createElement("div", { style: subHead }, "図鑑で、そのしごとを読む"), /* @__PURE__ */ React.createElement("div", { style: subDesc }, workFields(r.code).map((f) => `〈${f.cat}〉`).join(""), "。そこにどんなしごとがあり、どんな時間が流れているか。読んでから決められる"), /* @__PURE__ */ React.createElement("div", { style: subGo }, "地球のしごと図鑑 →"))));
+    })(), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10 } }, isDetail ? /* @__PURE__ */ React.createElement(
       "button",
       {
         onClick: startQuiz,
