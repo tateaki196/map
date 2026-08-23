@@ -1,7 +1,12 @@
-# tateaki196/map — 検証用ページの置き場。検索エンジンには載せない。
-# 注意：公開先は GitHub Pages の**プロジェクトページ**（https://tateaki196.github.io/map/）なので、
-# クローラが読むのはホスト直下の https://tateaki196.github.io/robots.txt であって、この
-# /map/robots.txt ではない。実効的に効くのは各ページの <meta name="robots" content="noindex">。
-# このファイルは意思表示と、将来ホスト直下へ置くときの原本を兼ねる。
+# tateaki196.github.io/map — 検証中のページ置き場。検索エンジンには載せない。
+#
+# 注意：**このファイルはクローラに読まれない。**公開先は GitHub Pages の
+# プロジェクトページ（https://tateaki196.github.io/map/）で、クローラが読む robots.txt は
+# ホスト直下の https://tateaki196.github.io/robots.txt だけ。ここに置いても効かない。
+# ホスト直下へ置く案（ユーザーページのリポジトリを新設する）は見送った（いぐろ裁定 2026-08-23）。
+#
+# **実効手段は各ページの <meta name="robots" content="noindex, nofollow">**（scripts/add_noindex.py）。
+# robots.txt の Disallow は「クロールするな」であって「索引に載せるな」ではなく、
+# 入れるとむしろ noindex を読ませられなくなる。このファイルは人向けの意思表示として残す。
 User-agent: *
 Disallow: /
