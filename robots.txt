@@ -1,0 +1,7 @@
+# tateaki196/map — 検証用ページの置き場。検索エンジンには載せない。
+# 注意：公開先は GitHub Pages の**プロジェクトページ**（https://tateaki196.github.io/map/）なので、
+# クローラが読むのはホスト直下の https://tateaki196.github.io/robots.txt であって、この
+# /map/robots.txt ではない。実効的に効くのは各ページの <meta name="robots" content="noindex">。
+# このファイルは意思表示と、将来ホスト直下へ置くときの原本を兼ねる。
+User-agent: *
+Disallow: /
